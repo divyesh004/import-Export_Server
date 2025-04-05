@@ -6,7 +6,8 @@
   "scripts": {
     "server": "nodemon index.js",
     "dev": "nodemon index.js",
-    "test": "jest"
+    "test": "jest",
+     "start": "node server.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
