@@ -80,7 +80,7 @@ class ProductController {
       if (!validCategories.includes(category.trim().toLowerCase())) {
         console.error('Invalid category:', category);
         return res.status(400).json({
-          error: 'अमान्य श्रेणी। कृपया एक मान्य श्रेणी चुनें',
+          error: 'Invalid category. Please select a valid category',
           validCategories
         });
       }
@@ -89,13 +89,13 @@ class ProductController {
       const parsedPrice = parseFloat(price);
       if (isNaN(parsedPrice) || parsedPrice <= 0) {
         console.error('Invalid price:', price);
-        return res.status(400).json({ error: 'मूल्य एक धनात्मक संख्या होनी चाहिए' });
+        return res.status(400).json({ error: 'value must be a positive number' });
       }
 
       // Validate image URLs
       if (!Array.isArray(imageUrls) || imageUrls.length === 0) {
         console.error('Invalid image URLs:', imageUrls);
-        return res.status(400).json({ error: 'कृपया कम से कम एक मान्य इमेज URL प्रदान करें' });
+        return res.status(400).json({ error: 'Please provide at least one valid image URL' });
       }
 
       // Process and validate each image URL
@@ -113,7 +113,7 @@ class ProductController {
 
       if (validatedImageUrls.length === 0) {
         console.error('No valid image URLs provided');
-        return res.status(400).json({ error: 'कृपया कम से कम एक मान्य इमेज URL प्रदान करें' });
+        return res.status(400).json({ error: 'Please provide at least one valid image URL' });
       }
 
       // Prepare product data
@@ -131,13 +131,13 @@ class ProductController {
       console.log('Product created successfully:', { productId: product.id, sellerId: req.user.id });
       
       res.status(201).json({
-        message: 'प्रोडक्ट सफलतापूर्वक बनाया गया',
+        message: 'Product successfully created',
         product
       });
     } catch (error) {
       console.error('Error creating product:', error);
       res.status(error.status || 400).json({
-        error: error.message || 'प्रोडक्ट बनाने में त्रुटि हुई',
+        error: error.message || 'There was an error creating the product',
         details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
@@ -235,6 +235,40 @@ class ProductController {
     } catch (error) {
       console.error('Error checking product status:', error);
       res.status(400).json({ error: error.message });
+    }
+  }
+
+  // Get seller's approved products (Seller only)
+  static async getSellerApprovedProducts(req, res) {
+    try {
+      if (!req.user) {
+        console.error('Unauthorized access attempt: No user found');
+        return res.status(401).json({ error: 'unauthorized access' });
+      }
+
+      if (req.user.role !== 'seller') {
+        console.error(`Access denied for role: ${req.user.role}`);
+        return res.status(403).json({ error: 'Access denied. For seller only।' });
+      }
+
+      const filters = { 
+        status: 'approved',
+        seller_id: req.user.id 
+      };
+
+      console.log('Fetching seller\'s approved products with filters:', filters);
+      const products = await ProductModel.findAll(filters);
+      
+      if (!products || products.length === 0) {
+        console.log('No approved products found for this seller');
+        return res.json([]);
+      }
+
+      console.log(`Found ${products.length} approved products for seller ${req.user.id}`);
+      res.json(products);
+    } catch (error) {
+      console.error('Error in getSellerApprovedProducts:', error);
+      res.status(500).json({ error: 'Failure to receive vendors approved products' });
     }
   }
 }

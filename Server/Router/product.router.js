@@ -16,6 +16,13 @@ router.post('/',
 // Public route for approved products
 router.get('/approved', ProductController.getApprovedProducts);
 
+// Seller route for their own approved products
+router.get('/seller/approved', 
+  authenticateToken,
+  authorizeRoles('seller'),
+  ProductController.getSellerApprovedProducts
+);
+
 // Admin routes for pending and rejected products
 router.get('/pending', authenticateToken, authorizeRoles('admin', 'seller'), ProductController.getPendingProducts);
 router.get('/rejected', authenticateToken, authorizeRoles('admin'), ProductController.getRejectedProducts);
