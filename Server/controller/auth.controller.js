@@ -5,16 +5,11 @@ class AuthController {
   // Register new user
   static async signup(req, res) {
     try {
-      const { email, password, name, role, phone, company_name, address, industry } = req.body;
+      const { email, password, name, role, phone, company_name, address } = req.body;
 
       // Validate required fields
       if (!email || !password || !name || !role) {
         return res.status(400).json({ error: 'Email, password, name, and role are required' });
-      }
-      
-      // Validate industry for sub-admin
-      if (role === 'sub-admin' && !industry) {
-        return res.status(400).json({ error: 'Industry field is required for Sub-Admin accounts' });
       }
 
       // Validate email format
@@ -192,7 +187,7 @@ class AuthController {
   static async changeUserRole(req, res) {
     try {
       const { role } = req.body;
-      const validRoles = ['customer', 'seller', 'admin', 'sub-admin', 'subadmin'];
+      const validRoles = ['customer', 'seller', 'admin'];
       
       if (!validRoles.includes(role)) {
         return res.status(400).json({ error: 'Invalid role' });

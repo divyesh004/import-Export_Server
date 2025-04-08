@@ -1,5 +1,4 @@
 const ProductModel = require('../model/product.model');
-const supabase = require('../config/supabase');
 
 class ProductController {
   // Get approved products (Public)
@@ -12,7 +11,7 @@ class ProductController {
     }
   }
 
-  // Get pending products (Admin, Sub-Admin, Seller)
+  // Get pending products (Admin only)
   static async getPendingProducts(req, res) {
     try {
       if (!req.user) {
@@ -22,37 +21,10 @@ class ProductController {
 
       if (req.user.role !== 'admin' && req.user.role !== 'seller' && req.user.role !== 'sub-admin') {
         console.error(`Access denied for role: ${req.user.role}`);
-        return res.status(403).json({ error: 'Access denied. Admin, Sub-Admin or seller only.' });
+        return res.status(403).json({ error: 'Access denied. Admin or seller only.' });
       }
 
-      // Sub-Admin can only see products where category matches their industry
-      if (req.user.role === 'sub-admin' && req.user.industry) {
-        console.log(`Fetching pending products for sub-admin with industry: ${req.user.industry}`);
-        
-        // Get all pending products
-        const { data: products, error } = await supabase
-          .from('products')
-          .select('*')
-          .eq('status', 'pending');
-          
-        if (error) {
-          console.error('Error fetching products for sub-admin:', error);
-          return res.status(500).json({ error: 'Failed to fetch products' });
-        }
-        
-        // Filter products where category matches sub-admin's industry
-        const filteredProducts = products.filter(product => {
-          return product.category && product.category.toLowerCase() === req.user.industry.toLowerCase();
-        });
-        
-        console.log(`Found ${filteredProducts.length} pending products where category matches industry: ${req.user.industry}`);
-        return res.json(filteredProducts);
-      }
-      
-      // For admin and seller
       const filters = { status: 'pending' };
-      
-      // Seller can only see their own products
       if (req.user.role === 'seller') {
         filters.seller_id = req.user.id;
       }
@@ -82,52 +54,6 @@ class ProductController {
       const products = await ProductModel.findAll({ status: 'rejected' });
       res.json(products);
     } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  }
-
-  // Get seller's approved products (Seller only)
-  static async getSellerApprovedProducts(req, res) {
-    try {
-      if (!req.user || req.user.role !== 'seller') {
-        return res.status(403).json({ error: 'Access denied. Seller only.' });
-      }
-      const products = await ProductModel.findAll({ 
-        status: 'approved',
-        seller_id: req.user.id 
-      });
-      res.json(products);
-    } catch (error) {
-      console.error('Error getting seller approved products:', error);
-      res.status(400).json({ error: error.message });
-    }
-  }
-
-  // Get sub-admin's industry-specific approved products (Sub-Admin only)
-  static async getSubAdminApprovedProducts(req, res) {
-    try {
-      if (!req.user || req.user.role !== 'sub-admin') {
-        return res.status(403).json({ error: 'Access denied. Sub-Admin only.' });
-      }
-      
-      if (!req.user.industry) {
-        return res.status(400).json({ error: 'No industry assigned to this Sub-Admin.' });
-      }
-      
-      // Get all approved products
-      const allApprovedProducts = await ProductModel.findAll({ 
-        status: 'approved'
-      });
-      
-      // Filter products where category matches sub-admin's industry
-      const filteredProducts = allApprovedProducts.filter(product => {
-        return product.category && product.category.toLowerCase() === req.user.industry.toLowerCase();
-      });
-      
-      console.log(`Found ${filteredProducts.length} approved products where category matches industry: ${req.user.industry}`);
-      res.json(filteredProducts);
-    } catch (error) {
-      console.error('Error getting industry-specific approved products:', error);
       res.status(400).json({ error: error.message });
     }
   }
@@ -250,81 +176,31 @@ class ProductController {
     }
   }
 
-  // Update product (Seller/Admin/Sub-Admin)
+  // Update product (Seller/Admin)
   static async updateProduct(req, res) {
     try {
-      const { id } = req.params;
-      const updateData = req.body;
-
-      const product = await ProductModel.findById(id);
-      if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
-      }
-
-      // Sellers can only update their own products
-      if (req.user.role === 'seller' && product.seller_id !== req.user.id) {
-        return res.status(403).json({ error: 'Access denied. You can only update your own products.' });
-      }
-      const updatedProduct = await ProductModel.update(id, updateData);
-      res.json(updatedProduct);
+      const product = await ProductModel.updateProduct(req.params.id, req.body, req.user.id);
+      res.json(product);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
   }
 
-  // Delete product (Seller/Admin/Sub-Admin)
+  // Delete product (Seller/Admin)
   static async deleteProduct(req, res) {
     try {
-      const { id } = req.params;
-
-      const product = await ProductModel.findById(id);
-      if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
-      }
-
-      // Sellers can only delete their own products
-      if (req.user.role === 'seller' && product.seller_id !== req.user.id) {
-        return res.status(403).json({ error: 'Access denied. You can only delete your own products.' });
-      }
-      
-      // Sub-Admin can only delete products from their assigned industry
-      if (req.user.role === 'sub-admin' && req.user.industry && product.industry !== req.user.industry) {
-        return res.status(403).json({ 
-          error: 'Access denied. Sub-Admins can only delete products from their assigned industry.' 
-        });
-      }
-
-      await ProductModel.delete(id);
-      res.json({ message: 'Product deleted successfully' });
+      await ProductModel.deleteProduct(req.params.id, req.user.id);
+      res.status(204).send();
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
   }
 
-  // Approve/Deny product (Admin and Sub-Admin)
+  // Approve/Deny product (Admin only)
   static async updateProductStatus(req, res) {
     try {
-      const { id } = req.params;
-      const { status, reason } = req.body;
-
-      if (!['approved', 'rejected'].includes(status)) {
-        return res.status(400).json({ error: 'Invalid status. Must be approved or rejected.' });
-      }
-
-      const product = await ProductModel.findById(id);
-      if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
-      }
-      
-      // Check if Sub-Admin has access to this product's industry
-      if (req.user.role === 'sub-admin' && req.user.industry && product.industry !== req.user.industry) {
-        return res.status(403).json({ 
-          error: 'Access denied. Sub-Admins can only manage products from their assigned industry.' 
-        });
-      }
-
-      const updatedProduct = await ProductModel.updateStatus(id, status, reason);
-      res.json(updatedProduct);
+      const product = await ProductModel.updateStatus(req.params.id, req.body.status);
+      res.json(product);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }

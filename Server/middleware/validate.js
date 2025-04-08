@@ -13,8 +13,7 @@ const userValidationRules = {
     body('name').optional().notEmpty().withMessage('Name cannot be empty'),
     body('phone').optional().notEmpty().withMessage('Phone number cannot be empty'),
     body('address').optional().notEmpty().withMessage('Address cannot be empty'),
-    body('company_name').optional().notEmpty().withMessage('Company name cannot be empty'),
-    body('industry').optional().notEmpty().withMessage('Industry cannot be empty')
+    body('company_name').optional().notEmpty().withMessage('Company name cannot be empty')
   ],
 
   signup: [
@@ -26,16 +25,9 @@ const userValidationRules = {
       .matches(/[a-z]/).withMessage('Password must contain at least one lowercase letter')
       .matches(/[A-Z]/).withMessage('Password must contain at least one uppercase letter')
       .matches(/[^\w\s]/).withMessage('Password must contain at least one special character'),
-    body('role').trim().isIn(['admin', 'seller', 'customer', 'sub-admin']).withMessage('Invalid role'),
+    body('role').isIn(['admin', 'seller', 'customer', 'sub-admin']).withMessage('Invalid role'),
     body('phone').notEmpty().withMessage('Phone number is required'),
-    body('company_name').optional(),
-    body('industry')
-      .custom((value, { req }) => {
-        if (req.body.role === 'sub-admin' && !value) {
-          throw new Error('Industry field is required for Sub-Admin accounts');
-        }
-        return true;
-      })
+    body('company_name').optional()
   ],
   login: [
     body('email').isEmail().withMessage('Invalid email format'),

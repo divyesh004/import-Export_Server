@@ -12,10 +12,10 @@ router.post('/',
   OrderController.createOrder
 );
 
-// Get all orders (Admin and Sub-Admin)
+// Get all orders (Admin only)
 router.get('/all',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   OrderController.getAllOrders
 );
 
@@ -31,24 +31,24 @@ router.get('/:id',
   OrderController.getOrderById
 );
 
-// Update order status (Seller/Admin/Sub-Admin)
+// Update order status (Seller/Admin)
 router.patch('/:id/status',
   authenticateToken,
-  authorizeRoles('seller', 'admin', 'sub-admin'),
+  authorizeRoles('seller', 'admin'),
   OrderController.updateOrderStatus
 );
 
-// Cancel order (Buyer/Admin/Sub-Admin)
+// Cancel order (Buyer/Admin)
 router.patch('/:id/cancel',
   authenticateToken,
-  authorizeRoles('buyer', 'admin', 'sub-admin'),
+  authorizeRoles('buyer', 'admin'),
   OrderController.cancelOrder
 );
 
-// Get order analytics (Admin and Sub-Admin)
+// Get order analytics (Admin only)
 router.get('/analytics',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   OrderController.getOrderAnalytics
 );
 

@@ -3,52 +3,52 @@ const router = express.Router();
 const AnalyticsController = require('../controller/analytics.controller');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 
-// Get dashboard statistics for admin and sub-admin dashboard
+// Get dashboard statistics for admin dashboard
 router.get('/dashboard',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   AnalyticsController.getDashboardStats
 );
 
-// Get recent activities for admin and sub-admin dashboard
+// Get recent activities for admin dashboard
 router.get('/activities',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   AnalyticsController.getRecentActivities
 );
 
 // Get sales analytics
 router.get('/sales',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   AnalyticsController.getSalesAnalytics
 );
 
 // Get user analytics
 router.get('/users',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   AnalyticsController.getUserAnalytics
 );
 
 // Get seller analytics
 router.get('/sellers',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   AnalyticsController.getSellerAnalytics
 );
 
 // Get platform analytics
 router.get('/platform',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   AnalyticsController.getPlatformAnalytics
 );
 
-// Get revenue analytics (Admin and Sub-Admin)
+// Get revenue analytics (Admin only)
 router.get('/revenue',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   async (req, res) => {
     try {
       const { data: orders } = await supabase
@@ -85,10 +85,10 @@ router.get('/revenue',
     }
 });
 
-// Get total sales report (Admin and Sub-Admin)
+// Get total sales report (Admin only)
 router.get('/sales',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   async (req, res) => {
     try {
       const statistics = await OrderModel.getOrderStatistics();
@@ -112,10 +112,10 @@ router.get('/sales',
     }
 });
 
-// Get user statistics (Admin and Sub-Admin)
+// Get user statistics (Admin only)
 router.get('/users',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   async (req, res) => {
     try {
       const buyers = await UserModel.findByRole('buyer');
@@ -149,10 +149,10 @@ router.get('/users',
     }
 });
 
-// Get revenue details (Admin and Sub-Admin)
+// Get revenue details (Admin only)
 router.get('/revenue',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   async (req, res) => {
     try {
       const { data: orders, error } = await supabase

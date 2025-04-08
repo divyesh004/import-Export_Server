@@ -20,20 +20,20 @@ router.get('/questions',
   QAController.getUserQuestions
 );
 
-// Get all questions (Admin/Sub-Admin/Seller only)
+// Get all questions (Admin/Seller only)
 router.get('/questions/all',
   authenticateToken,
-  authorizeRoles('seller', 'admin', 'sub-admin'),
+  authorizeRoles('seller', 'admin'),
   QAController.getAllQuestions
 );
 
 // Get all questions for a product
 router.get('/questions/:productId', QAController.getProductQuestions);
 
-// Answer a question (Seller/Admin/Sub-Admin only)
+// Answer a question (Seller/Admin only)
 router.post('/answers/:questionId',
   authenticateToken,
-  authorizeRoles('seller', 'admin', 'sub-admin'),
+  authorizeRoles('seller', 'admin'),
   qaValidationRules.answer,
   validateRequest,
   QAController.createAnswer
@@ -42,17 +42,17 @@ router.post('/answers/:questionId',
 // Get answers for a question
 router.get('/answers/:questionId', QAController.getQuestionAnswers);
 
-// Delete a question (Admin and Sub-Admin only)
+// Delete a question (Admin only)
 router.delete('/questions/:id',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   QAController.deleteQuestion
 );
 
-// Delete an answer (Admin and Sub-Admin only)
+// Delete an answer (Admin only)
 router.delete('/answers/:id',
   authenticateToken,
-  authorizeRoles('admin', 'sub-admin'),
+  authorizeRoles('admin'),
   QAController.deleteAnswer
 );
 
