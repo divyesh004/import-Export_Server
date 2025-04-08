@@ -32,24 +32,24 @@ router.patch('/update',
   AuthController.updateProfile
 );
 
-// Get users by role (Admin only)
+// Get users by role (Admin and Sub-Admin)
 router.get('/role/:role', 
   authenticateToken, 
-  authorizeRoles('admin'), 
+  authorizeRoles('admin', 'sub-admin'), 
   AuthController.getUsersByRole
 );
 
-// Approve seller account (Admin only)
+// Approve seller account (Admin and Sub-Admin)
 router.patch('/approve/:id', 
   authenticateToken, 
-  authorizeRoles('admin'), 
+  authorizeRoles('admin', 'sub-admin'), 
   AuthController.approveSeller
 );
 
-// Ban/unban user (Admin only)
+// Ban/unban user (Admin and Sub-Admin)
 router.patch('/ban/:id', 
   authenticateToken, 
-  authorizeRoles('admin'), 
+  authorizeRoles('admin', 'sub-admin'), 
   AuthController.toggleUserBan
 );
 
@@ -67,10 +67,19 @@ router.post('/reset-password',
   AuthController.resetPassword
 );
 
-// Change user role (Admin only)
+// Restrict sub-admin from creating/removing admins
+router.use('/role/change/:id', (req, res, next) => {
+  // If user is sub-admin and trying to create an admin, block it
+  if (req.user && req.user.role === 'sub-admin' && req.body.role === 'admin') {
+    return res.status(403).json({ error: 'Sub-admins cannot create or modify admin accounts' });
+  }
+  next();
+});
+
+// Change user role (Admin and Sub-Admin)
 router.patch('/role/change/:id',
   authenticateToken,
-  authorizeRoles('admin'),
+  authorizeRoles('admin', 'sub-admin'),
   AuthController.changeUserRole
 );
 

@@ -4,7 +4,12 @@ const jwt = require('jsonwebtoken');
 
 class UserModel {
   static async createUser(userData) {
-    const { name, email, password, role, phone, company_name = null, address = null } = userData;
+    const { name, email, password, role, phone, company_name = null, address = null, industry = null } = userData;
+
+    // Validate industry for sub-admin
+    if (role === 'sub-admin' && !industry) {
+      throw new Error('Industry field is required for Sub-Admin accounts');
+    }
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
@@ -21,7 +26,8 @@ class UserModel {
           role,
           phone,
           company_name,
-          address
+          address,
+          industry
         }
       ])
       .select()

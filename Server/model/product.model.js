@@ -2,7 +2,7 @@ const supabase = require('../config/supabase');
 
 class ProductModel {
   static async createProduct(productData, sellerId) {
-    const { name, description, price, image_url } = productData;
+    const { name, description, price, image_url, industry } = productData;
 
     // Validate images
     if (!image_url) {
@@ -43,7 +43,8 @@ class ProductModel {
         description,
         price,
         seller_id: sellerId,
-        status: 'pending'
+        status: 'pending',
+        industry
       }])
       .select()
       .single();
