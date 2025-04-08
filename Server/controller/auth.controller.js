@@ -52,6 +52,13 @@ class AuthController {
           return res.status(400).json({ error: 'Address is required for seller accounts' });
         }
       }
+      
+      // Additional validations for sub-admin role
+      if (role === 'sub-admin') {
+        if (!req.body.industry) {
+          return res.status(400).json({ error: 'Industry is required for sub-admin accounts' });
+        }
+      }
 
       // Validate phone format if provided
       if (phone) {

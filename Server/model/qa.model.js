@@ -94,7 +94,7 @@ class QAModel {
     return answers;
   }
 
-  static async getAllQuestions(userId, role) {
+  static async getAllQuestions(userId, role, industry) {
     let query = supabase
       .from('questions')
       .select(`
@@ -107,6 +107,11 @@ class QAModel {
     // If user is a seller, only show questions for their products
     if (role === 'seller') {
       query = query.eq('products.seller_id', userId);
+    }
+    
+    // If user is a sub-admin, only show questions for their industry
+    if (role === 'sub-admin' && industry) {
+      query = query.eq('products.industry', industry);
     }
 
     const { data: questions, error } = await query;

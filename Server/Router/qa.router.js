@@ -20,10 +20,10 @@ router.get('/questions',
   QAController.getUserQuestions
 );
 
-// Get all questions (Admin/Seller only)
+// Get all questions (Admin/Seller/Sub-Admin only)
 router.get('/questions/all',
   authenticateToken,
-  authorizeRoles('seller', 'admin'),
+  authorizeRoles('seller', 'admin', 'sub-admin'),
   QAController.getAllQuestions
 );
 

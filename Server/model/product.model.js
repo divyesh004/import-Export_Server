@@ -124,6 +124,14 @@ class ProductModel {
       query = query.eq('seller_id', filters.seller_id);
     }
 
+    if (filters.industry) {
+      query = query.eq('industry', filters.industry);
+    }
+    
+    if (filters.category) {
+      query = query.eq('category', filters.category);
+    }
+
     const { data: products, error } = await query;
 
     if (error) {

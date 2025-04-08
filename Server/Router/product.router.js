@@ -27,6 +27,11 @@ router.get('/seller/approved',
 router.get('/pending', authenticateToken, authorizeRoles('admin', 'seller'), ProductController.getPendingProducts);
 router.get('/rejected', authenticateToken, authorizeRoles('admin'), ProductController.getRejectedProducts);
 
+// Sub-Admin routes for industry-specific products
+router.get('/industry/approved', authenticateToken, authorizeRoles('sub-admin'), ProductController.getIndustryApprovedProducts);
+router.get('/industry/pending', authenticateToken, authorizeRoles('sub-admin'), ProductController.getIndustryPendingProducts);
+router.get('/industry/rejected', authenticateToken, authorizeRoles('sub-admin'), ProductController.getIndustryRejectedProducts);
+
 // Get all products
 router.get('/', ProductController.getAllProducts);
 

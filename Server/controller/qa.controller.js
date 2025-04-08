@@ -1,10 +1,10 @@
 const QAModel = require('../model/qa.model');
 
 class QAController {
-  // Get all questions (Admin/Seller only)
+  // Get all questions (Admin/Seller/Sub-Admin only)
   static async getAllQuestions(req, res) {
     try {
-      const questions = await QAModel.getAllQuestions(req.user.id, req.user.role);
+      const questions = await QAModel.getAllQuestions(req.user.id, req.user.role, req.user.industry);
       res.json(questions);
     } catch (error) {
       console.error('Error getting all questions:', error);

@@ -27,7 +27,13 @@ const userValidationRules = {
       .matches(/[^\w\s]/).withMessage('Password must contain at least one special character'),
     body('role').isIn(['admin', 'seller', 'customer', 'sub-admin']).withMessage('Invalid role'),
     body('phone').notEmpty().withMessage('Phone number is required'),
-    body('company_name').optional()
+    body('company_name').optional(),
+    body('industry').custom((value, { req }) => {
+      if (req.body.role === 'sub-admin' && !value) {
+        throw new Error('Industry is required for sub-admin accounts');
+      }
+      return true;
+    })
   ],
   login: [
     body('email').isEmail().withMessage('Invalid email format'),

@@ -1,4 +1,5 @@
 const ProductModel = require('../model/product.model');
+const supabase = require('../config/supabase');
 
 class ProductController {
   // Get approved products (Public)
@@ -196,11 +197,30 @@ class ProductController {
     }
   }
 
-  // Approve/Deny product (Admin only)
+  // Approve/Deny product (Admin and Sub-Admin)
   static async updateProductStatus(req, res) {
     try {
-      const product = await ProductModel.updateStatus(req.params.id, req.body.status);
-      res.json(product);
+      // Check if user is authenticated
+      if (!req.user) {
+        return res.status(401).json({ error: 'Unauthorized access' });
+      }
+
+      // Get the product to check its industry
+      const product = await ProductModel.findById(req.params.id);
+      if (!product) {
+        return res.status(404).json({ error: 'Product not found' });
+      }
+
+      // For sub-admin, check if product belongs to their industry
+      if (req.user.role === 'sub-admin') {
+        if (product.category !== req.user.industry) {
+          return res.status(403).json({ error: 'You can only manage products from your assigned industry' });
+        }
+      }
+
+      // Update the product status
+      const updatedProduct = await ProductModel.updateStatus(req.params.id, req.body.status);
+      res.json(updatedProduct);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
@@ -269,6 +289,105 @@ class ProductController {
     } catch (error) {
       console.error('Error in getSellerApprovedProducts:', error);
       res.status(500).json({ error: 'Failure to receive vendors approved products' });
+    }
+  }
+
+  // Get industry-specific approved products (Sub-Admin only)
+  static async getIndustryApprovedProducts(req, res) {
+    try {
+      if (!req.user) {
+        console.error('Unauthorized access attempt: No user found');
+        return res.status(401).json({ error: 'Unauthorized access' });
+      }
+
+      if (req.user.role !== 'sub-admin') {
+        console.error(`Access denied for role: ${req.user.role}`);
+        return res.status(403).json({ error: 'Access denied. Sub-admin only.' });
+      }
+
+      // Get the sub-admin's industry
+      const industry = req.user.industry;
+      if (!industry) {
+        return res.status(400).json({ error: 'No industry assigned to this sub-admin' });
+      }
+
+      // Use ProductModel to find products by category and status
+      const products = await ProductModel.findAll({ 
+        category: industry, // Filter by category matching sub-admin's industry
+        status: 'approved' 
+      });
+
+      console.log(`Found ${products.length} approved products for industry ${industry}`);
+      res.json(products);
+    } catch (error) {
+      console.error('Error in getIndustryApprovedProducts:', error);
+      res.status(500).json({ error: 'Failed to fetch industry approved products' });
+    }
+  }
+
+  // Get industry-specific pending products (Sub-Admin only)
+  static async getIndustryPendingProducts(req, res) {
+    try {
+      if (!req.user) {
+        console.error('Unauthorized access attempt: No user found');
+        return res.status(401).json({ error: 'Unauthorized access' });
+      }
+
+      if (req.user.role !== 'sub-admin') {
+        console.error(`Access denied for role: ${req.user.role}`);
+        return res.status(403).json({ error: 'Access denied. Sub-admin only.' });
+      }
+
+      // Get the sub-admin's industry
+      const industry = req.user.industry;
+      if (!industry) {
+        return res.status(400).json({ error: 'No industry assigned to this sub-admin' });
+      }
+
+      // Use ProductModel to find products by category and status
+      const products = await ProductModel.findAll({ 
+        category: industry, // Filter by category matching sub-admin's industry
+        status: 'pending' 
+      });
+
+      console.log(`Found ${products.length} pending products for industry ${industry}`);
+      res.json(products);
+    } catch (error) {
+      console.error('Error in getIndustryPendingProducts:', error);
+      res.status(500).json({ error: 'Failed to fetch industry pending products' });
+    }
+  }
+
+  // Get industry-specific rejected products (Sub-Admin only)
+  static async getIndustryRejectedProducts(req, res) {
+    try {
+      if (!req.user) {
+        console.error('Unauthorized access attempt: No user found');
+        return res.status(401).json({ error: 'Unauthorized access' });
+      }
+
+      if (req.user.role !== 'sub-admin') {
+        console.error(`Access denied for role: ${req.user.role}`);
+        return res.status(403).json({ error: 'Access denied. Sub-admin only.' });
+      }
+
+      // Get the sub-admin's industry
+      const industry = req.user.industry;
+      if (!industry) {
+        return res.status(400).json({ error: 'No industry assigned to this sub-admin' });
+      }
+
+      // Use ProductModel to find products by category and status
+      const products = await ProductModel.findAll({ 
+        category: industry, // Filter by category matching sub-admin's industry
+        status: 'rejected' 
+      });
+
+      console.log(`Found ${products.length} rejected products for industry ${industry}`);
+      res.json(products);
+    } catch (error) {
+      console.error('Error in getIndustryRejectedProducts:', error);
+      res.status(500).json({ error: 'Failed to fetch industry rejected products' });
     }
   }
 }
