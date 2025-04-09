@@ -27,6 +27,13 @@ router.get('/questions/all',
   QAController.getAllQuestions
 );
 
+// Get industry-specific questions (Sub-Admin only)
+router.get('/questions/industry',
+  authenticateToken,
+  authorizeRoles('sub-admin'),
+  QAController.getAllQuestions
+);
+
 // Get all questions for a product
 router.get('/questions/:productId', QAController.getProductQuestions);
 

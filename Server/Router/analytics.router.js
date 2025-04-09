@@ -6,49 +6,49 @@ const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 // Get dashboard statistics for admin dashboard
 router.get('/dashboard',
   authenticateToken,
-  authorizeRoles('admin'),
+  authorizeRoles('admin', 'sub-admin'),
   AnalyticsController.getDashboardStats
 );
 
 // Get recent activities for admin dashboard
 router.get('/activities',
   authenticateToken,
-  authorizeRoles('admin'),
+  authorizeRoles('admin', 'sub-admin'),
   AnalyticsController.getRecentActivities
 );
 
 // Get sales analytics
 router.get('/sales',
   authenticateToken,
-  authorizeRoles('admin'),
+  authorizeRoles('admin', 'sub-admin'),
   AnalyticsController.getSalesAnalytics
 );
 
 // Get user analytics
 router.get('/users',
   authenticateToken,
-  authorizeRoles('admin'),
+  authorizeRoles('admin', 'sub-admin'),
   AnalyticsController.getUserAnalytics
 );
 
 // Get seller analytics
 router.get('/sellers',
   authenticateToken,
-  authorizeRoles('admin'),
+  authorizeRoles('admin', 'sub-admin'),
   AnalyticsController.getSellerAnalytics
 );
 
 // Get platform analytics
 router.get('/platform',
   authenticateToken,
-  authorizeRoles('admin'),
+  authorizeRoles('admin', 'sub-admin'),
   AnalyticsController.getPlatformAnalytics
 );
 
-// Get revenue analytics (Admin only)
+// Get revenue analytics (Admin and Sub-admin)
 router.get('/revenue',
   authenticateToken,
-  authorizeRoles('admin'),
+  authorizeRoles('admin', 'sub-admin'),
   async (req, res) => {
     try {
       const { data: orders } = await supabase
@@ -85,10 +85,10 @@ router.get('/revenue',
     }
 });
 
-// Get total sales report (Admin only)
-router.get('/sales',
+// Get total sales report (Admin and Sub-admin)
+router.get('/sales/report',
   authenticateToken,
-  authorizeRoles('admin'),
+  authorizeRoles('admin', 'sub-admin'),
   async (req, res) => {
     try {
       const statistics = await OrderModel.getOrderStatistics();

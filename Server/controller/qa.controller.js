@@ -4,7 +4,20 @@ class QAController {
   // Get all questions (Admin/Seller/Sub-Admin only)
   static async getAllQuestions(req, res) {
     try {
-      const questions = await QAModel.getAllQuestions(req.user.id, req.user.role, req.user.industry);
+      // Make sure user object exists before accessing its properties
+      const userId = req.user ? req.user.id : null;
+      const userRole = req.user ? req.user.role : null;
+      
+      // Get industry from query params (for API calls) or from user object if sub-admin
+      let industry = req.query.industry;
+      
+      // For sub-admin, always use their assigned industry
+      if (userRole === 'sub-admin' && req.user.industry) {
+        industry = req.user.industry;
+        console.log(`Sub-admin filtering questions by industry: ${industry}`);
+      }
+      
+      const questions = await QAModel.getAllQuestions(userId, userRole, industry);
       res.json(questions);
     } catch (error) {
       console.error('Error getting all questions:', error);
