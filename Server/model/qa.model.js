@@ -100,20 +100,18 @@ class QAModel {
       .select(`
         *,
         users!questions_user_id_fkey(name),
-        products(*)
+        products!inner(*)
       `)
       .order('created_at', { ascending: false });
 
     // If user is a seller, only show questions for their products
-    if (role === 'seller' && userId) {
+    if (role === 'seller') {
       query = query.eq('products.seller_id', userId);
     }
     
     // If user is a sub-admin, only show questions for their industry
     if (role === 'sub-admin' && industry) {
-      // Filter by industry in the products table using the proper Supabase syntax
-      // for filtering on joined tables - using eq() instead of filter() for foreign tables
-      query = query.eq('products.category', industry);
+      query = query.eq('products.industry', industry);
     }
 
     const { data: questions, error } = await query;

@@ -44,7 +44,7 @@ class ProductModel {
         price,
         seller_id: sellerId,
         status: 'pending',
-        industry
+        category:industry
       }])
       .select()
       .single();

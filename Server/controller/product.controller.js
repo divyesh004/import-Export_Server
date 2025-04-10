@@ -122,7 +122,7 @@ class ProductController {
         name: name.trim(),
         description: description.trim(),
         price: parsedPrice,
-        category: category.trim().toLowerCase(),
+        industry: category.trim().toLowerCase(), // Changed from category to industry to match model expectation
         image_url: validatedImageUrls, // Changed from imageUrls to image_url to match model expectation
         seller_id: req.user.id
       };
