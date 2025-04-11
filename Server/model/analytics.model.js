@@ -175,12 +175,17 @@ class AnalyticsModel {
     };
   }
 
-  static async getDashboardStats() {
+  static async getDashboardStats(industry = null) {
     try {
       // Get user statistics
-      const { data: users, error: userError } = await supabase
-        .from('users')
-        .select('*');
+      let userQuery = supabase.from('users').select('*');
+      
+      // Filter users by industry if specified (for sub-admin)
+      if (industry) {
+        userQuery = userQuery.eq('industry', industry);
+      }
+      
+      const { data: users, error: userError } = await userQuery;
 
       if (userError) {
         throw new Error(userError.message);
@@ -190,9 +195,15 @@ class AnalyticsModel {
       const totalSellers = users.filter(user => user.role === 'seller').length;
 
       // Get order statistics
-      const { data: orders, error: orderError } = await supabase
-        .from('orders')
-        .select('*, products(*)');
+      let orderQuery = supabase.from('orders').select('*, products(*)');
+      
+      // For sub-admin, only get orders related to their industry
+      if (industry) {
+        // Join with products and filter by industry (stored in category column)
+        orderQuery = orderQuery.eq('products.category', industry);
+      }
+      
+      const { data: orders, error: orderError } = await orderQuery;
 
       if (orderError) {
         throw new Error(orderError.message);
@@ -213,9 +224,14 @@ class AnalyticsModel {
       }, 0);
 
       // Get all questions
-      const { data: allQuestions, error: questionError } = await supabase
-        .from('questions')
-        .select('id');
+      let questionQuery = supabase.from('questions').select('id, products(category)');
+      
+      // Filter questions by industry if specified (for sub-admin)
+      if (industry) {
+        questionQuery = questionQuery.eq('products.category', industry);
+      }
+      
+      const { data: allQuestions, error: questionError } = await questionQuery;
 
       if (questionError) {
         throw new Error(questionError.message);
@@ -235,10 +251,17 @@ class AnalyticsModel {
       const pendingQuestions = allQuestions.filter(question => !answeredQuestionIds.has(question.id)).length;
       
       // Get pending products
-      const { data: pendingProductsData, error: productError } = await supabase
+      let productQuery = supabase
         .from('products')
         .select('id')
         .eq('status', 'pending');
+      
+      // Filter products by industry/category if specified (for sub-admin)
+      if (industry) {
+        productQuery = productQuery.eq('category', industry);
+      }
+        
+      const { data: pendingProductsData, error: productError } = await productQuery;
         
       if (productError) {
         throw new Error(productError.message);
@@ -260,36 +283,57 @@ class AnalyticsModel {
     }
   }
 
-  static async getRecentActivities() {
+  static async getRecentActivities(industry = null) {
     try {
       // Get recent orders
-      const { data: recentOrders, error: orderError } = await supabase
+      let orderQuery = supabase
         .from('orders')
-        .select('*, users!orders_buyer_id_fkey(name), products(name)')
+        .select('*, users!orders_buyer_id_fkey(name), products(name, category)')
         .order('created_at', { ascending: false })
         .limit(5);
+      
+      // Filter by industry if specified (for sub-admin)
+      if (industry) {
+        orderQuery = orderQuery.eq('products.category', industry);
+      }
+      
+      const { data: recentOrders, error: orderError } = await orderQuery;
 
       if (orderError) {
         throw new Error(orderError.message);
       }
 
       // Get recent questions
-      const { data: recentQuestions, error: questionError } = await supabase
+      let questionQuery = supabase
         .from('questions')
-        .select('*, users(name), products(name)')
+        .select('*, users(name), products(name, category)')
         .order('created_at', { ascending: false })
         .limit(5);
+        
+      // Filter by industry if specified (for sub-admin)
+      if (industry) {
+        questionQuery = questionQuery.eq('products.category', industry);
+      }
+      
+      const { data: recentQuestions, error: questionError } = await questionQuery;
 
       if (questionError) {
         throw new Error(questionError.message);
       }
 
       // Get recent user registrations
-      const { data: recentUsers, error: userError } = await supabase
+      let userQuery = supabase
         .from('users')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(5);
+        
+      // Filter by industry if specified (for sub-admin)
+      if (industry) {
+        userQuery = userQuery.eq('industry', industry);
+      }
+      
+      const { data: recentUsers, error: userError } = await userQuery;
 
       if (userError) {
         throw new Error(userError.message);
@@ -297,21 +341,21 @@ class AnalyticsModel {
 
       // Combine and format activities
       const activities = [
-        ...recentOrders.map(order => ({
+        ...recentOrders.filter(order => order.users && order.products).map(order => ({
           id: `order-${order.id}`,
-          text: `${order.users.name} placed an order for ${order.products.name}`,
+          text: `${order.users?.name || 'A user'} placed an order for ${order.products?.name || 'a product'}`,
           time: new Date(order.created_at).toLocaleString(),
           type: 'order'
         })),
-        ...recentQuestions.map(question => ({
+        ...recentQuestions.filter(question => question.users && question.products).map(question => ({
           id: `question-${question.id}`,
-          text: `${question.users.name} asked a question about ${question.products.name}`,
+          text: `${question.users?.name || 'A user'} asked a question about ${question.products?.name || 'a product'}`,
           time: new Date(question.created_at).toLocaleString(),
           type: 'question'
         })),
         ...recentUsers.map(user => ({
           id: `user-${user.id}`,
-          text: `${user.name} joined as a ${user.role}`,
+          text: `${user.name || 'A user'} joined as a ${user.role || 'member'}`,
           time: new Date(user.created_at).toLocaleString(),
           type: 'user'
         }))

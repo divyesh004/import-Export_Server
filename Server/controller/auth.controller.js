@@ -180,27 +180,36 @@ class AuthController {
     }
   }
 
-  // Ban/unban user (Admin only)
-  static async toggleUserBan(req, res) {
-    try {
-      const user = await UserModel.updateUser(req.params.id, { is_banned: req.body.is_banned });
-      res.json(user);
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  }
+  // This function has been merged with banUser function
+  // Keeping this comment for reference
 
   // Change user role (Admin only)
   static async changeUserRole(req, res) {
     try {
+      // Verify that the current user is an admin (not a sub-admin)
+      if (req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Only admin users can change user roles' });
+      }
+
       const { role } = req.body;
-      const validRoles = ['customer', 'seller', 'admin'];
+      const validRoles = ['customer', 'seller', 'admin', 'sub-admin'];
       
       if (!validRoles.includes(role)) {
         return res.status(400).json({ error: 'Invalid role' });
       }
 
-      const user = await UserModel.updateUser(req.params.id, { role });
+      // Additional validation for sub-admin role
+      if (role === 'sub-admin' && !req.body.industry) {
+        return res.status(400).json({ error: 'Industry is required for sub-admin accounts' });
+      }
+
+      // Prepare update data
+      const updateData = { role };
+      if (role === 'sub-admin' && req.body.industry) {
+        updateData.industry = req.body.industry;
+      }
+
+      const user = await UserModel.updateUser(req.params.id, updateData);
       res.json(user);
     } catch (error) {
       res.status(400).json({ error: error.message });

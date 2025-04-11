@@ -42,10 +42,10 @@ router.post('/answers/:questionId',
 // Get answers for a question
 router.get('/answers/:questionId', QAController.getQuestionAnswers);
 
-// Delete a question (Admin only)
+// Delete a question (Admin and Sub-Admin)
 router.delete('/questions/:id',
   authenticateToken,
-  authorizeRoles('admin'),
+  authorizeRoles('admin', 'sub-admin'),
   QAController.deleteQuestion
 );
 

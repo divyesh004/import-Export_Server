@@ -96,6 +96,19 @@ class UserModel {
     return users;
   }
 
+  static async getBannedUsers() {
+    const { data: users, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('is_banned', true);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return users;
+  }
+
   static generateToken(userId) {
     return jwt.sign({ userId }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN

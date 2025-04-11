@@ -46,13 +46,6 @@ router.patch('/approve/:id',
   AuthController.approveSeller
 );
 
-// Ban/unban user (Admin only)
-router.patch('/ban/:id', 
-  authenticateToken, 
-  authorizeRoles('admin'), 
-  AuthController.toggleUserBan
-);
-
 // Forgot password
 router.post('/forgot-password',
   userValidationRules.forgotPassword,

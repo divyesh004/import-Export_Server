@@ -6,14 +6,14 @@ const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 // Get dashboard statistics for admin dashboard
 router.get('/dashboard',
   authenticateToken,
-  authorizeRoles('admin'),
+  authorizeRoles('admin', 'sub-admin'),
   AnalyticsController.getDashboardStats
 );
 
 // Get recent activities for admin dashboard
 router.get('/activities',
   authenticateToken,
-  authorizeRoles('admin'),
+  authorizeRoles('admin', 'sub-admin'),
   AnalyticsController.getRecentActivities
 );
 

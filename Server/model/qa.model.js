@@ -109,9 +109,9 @@ class QAModel {
       query = query.eq('products.seller_id', userId);
     }
     
-    // If user is a sub-admin, only show questions for their industry
+    // If user is a sub-admin, only show questions for their industry/category
     if (role === 'sub-admin' && industry) {
-      query = query.eq('products.industry', industry);
+      query = query.eq('products.category', industry);
     }
 
     const { data: questions, error } = await query;
@@ -168,8 +168,41 @@ class QAModel {
   }
 
   static async deleteQuestion(questionId, userId, role) {
-    // Only admin or the user who asked the question can delete it
-    if (role !== 'admin') {
+    // Admin can delete any question
+    if (role === 'admin') {
+      // Admin can delete any question, proceed directly
+    } 
+    // Sub-admin can only delete questions from their industry
+    else if (role === 'sub-admin') {
+      // Get the question with product details
+      const { data: question, error: questionError } = await supabase
+        .from('questions')
+        .select('*, products!inner(*)')
+        .eq('id', questionId)
+        .single();
+
+      if (questionError || !question) {
+        throw new Error('Question not found');
+      }
+
+      // Get sub-admin's industry from users table
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('industry')
+        .eq('id', userId)
+        .single();
+
+      if (userError || !user || !user.industry) {
+        throw new Error('Unable to verify sub-admin industry');
+      }
+
+      // Check if the question's product belongs to the sub-admin's industry
+      if (question.products.category !== user.industry) {
+        throw new Error('Unauthorized to delete this question - not in your industry');
+      }
+    } 
+    // Regular users can only delete their own questions
+    else {
       const { data: question } = await supabase
         .from('questions')
         .select('user_id')

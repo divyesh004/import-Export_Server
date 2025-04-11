@@ -78,7 +78,13 @@ class AnalyticsController {
   // Get dashboard statistics for admin dashboard
   static async getDashboardStats(req, res) {
     try {
-      const stats = await AnalyticsModel.getDashboardStats();
+      // Check if user is sub-admin and has industry assigned
+      let industry = null;
+      if (req.user.role === 'sub-admin' && req.user.industry) {
+        industry = req.user.industry;
+      }
+      
+      const stats = await AnalyticsModel.getDashboardStats(industry);
       res.json(stats);
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -89,8 +95,14 @@ class AnalyticsController {
   // Get recent activities for admin dashboard
   static async getRecentActivities(req, res) {
     try {
-      const activities = await AnalyticsModel.getRecentActivities();
-      res.json(activities);
+      // Check if user is sub-admin and has industry assigned
+      let industry = null;
+      if (req.user.role === 'sub-admin' && req.user.industry) {
+        industry = req.user.industry;
+      }
+      
+      const activities = await AnalyticsModel.getRecentActivities(industry);
+      res.json({ activities });
     } catch (error) {
       console.error('Error fetching recent activities:', error);
       res.status(500).json({ error: error.message || 'Failed to fetch recent activities' });
