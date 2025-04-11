@@ -64,21 +64,21 @@ class ProductController {
       // Validate user authentication and role
       if (!req.user?.id || req.user.role !== 'seller') {
         console.error('Unauthorized product creation attempt:', { userId: req.user?.id, role: req.user?.role });
-        return res.status(401).json({ error: 'केवल विक्रेता ही प्रोडक्ट बना सकते हैं' });
+        return res.status(401).json({ error: 'Only sellers can create products' });
       }
 
       // Extract and validate required fields
-      const { name, description, price, imageUrls, category } = req.body;
+      const { name, description, price, imageUrls, category, availability, brand, key_features, specification } = req.body;
 
       // Validate basic required fields
-      if (!name?.trim() || !description?.trim() || !category?.trim()) {
+      if (!name || !description || !category || name.toString().length === 0 || description.toString().length === 0 || category.toString().length === 0) {
         console.error('Missing required fields:', { name, description, category });
-        return res.status(400).json({ error: 'नाम, विवरण और श्रेणी आवश्यक हैं' });
+        return res.status(400).json({ error: 'Name, description and category are required' });
       }
 
       // Validate category
       const validCategories = ['clothing', 'accessories', 'footwear', 'electronics', 'home', 'beauty'];
-      if (!validCategories.includes(category.trim().toLowerCase())) {
+      if (!validCategories.includes(category.toString().toLowerCase())) {
         console.error('Invalid category:', category);
         return res.status(400).json({
           error: 'Invalid category. Please select a valid category',
@@ -101,7 +101,7 @@ class ProductController {
 
       // Process and validate each image URL
       const validatedImageUrls = imageUrls
-        .map(url => url?.trim())
+        .map(url => url?.toString())
         .filter(url => {
           if (!url) return false;
           try {
@@ -116,15 +116,43 @@ class ProductController {
         console.error('No valid image URLs provided');
         return res.status(400).json({ error: 'Please provide at least one valid image URL' });
       }
+      
+      // Validate availability
+      if (!availability) {
+        console.error('Missing availability');
+        return res.status(400).json({ error: 'Availability is required' });
+      }
+      
+      // Validate brand
+      if (!brand) {
+        console.error('Missing brand');
+        return res.status(400).json({ error: 'brand is required' });
+      }
+      
+      // Validate key_features
+      if (!key_features) {
+        console.error('Missing key_features');
+        return res.status(400).json({ error: 'Key features are required' });
+      }
+      
+      // Validate specification
+      if (!specification) {
+        console.error('Missing specification');
+        return res.status(400).json({ error: 'specification required' });
+      }
 
       // Prepare product data
       const productData = {
-        name: name.trim(),
-        description: description.trim(),
+        name: name.toString(),
+        description: description.toString(),
         price: parsedPrice,
-        industry: category.trim().toLowerCase(), // Changed from category to industry to match model expectation
+        industry: category.toString().toLowerCase(), // Changed from category to industry to match model expectation
         image_url: validatedImageUrls, // Changed from imageUrls to image_url to match model expectation
-        seller_id: req.user.id
+        seller_id: req.user.id,
+        availability: availability,
+        brand: brand,
+        key_features: key_features,
+        specification: specification
       };
 
       // Create the product
