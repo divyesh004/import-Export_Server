@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 class UserModel {
   static async createUser(userData) {
-    const { name, email, password, role, phone, company_name = null, address = null, industry = null } = userData;
+    const { name, email, password, role, phone, company_name = null, address = null, industry = null, country = null } = userData;
 
     // Validate industry for sub-admin
     if (role === 'sub-admin' && !industry) {
@@ -27,7 +27,8 @@ class UserModel {
           phone,
           company_name,
           address,
-          industry
+          industry,
+          country
         }
       ])
       .select()

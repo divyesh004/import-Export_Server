@@ -13,6 +13,7 @@ const userValidationRules = {
     body('name').optional().notEmpty().withMessage('Name cannot be empty'),
     body('phone').optional().notEmpty().withMessage('Phone number cannot be empty'),
     body('address').optional().notEmpty().withMessage('Address cannot be empty'),
+    body('country').optional().notEmpty().withMessage('Country cannot be empty'),
     body('company_name').optional().notEmpty().withMessage('Company name cannot be empty')
   ],
 
@@ -27,6 +28,7 @@ const userValidationRules = {
       .matches(/[^\w\s]/).withMessage('Password must contain at least one special character'),
     body('role').isIn(['admin', 'seller', 'customer', 'sub-admin']).withMessage('Invalid role'),
     body('phone').notEmpty().withMessage('Phone number is required'),
+    body('country').notEmpty().withMessage('Country is required'),
     body('company_name').optional(),
     body('industry').custom((value, { req }) => {
       if (req.body.role === 'sub-admin' && !value) {

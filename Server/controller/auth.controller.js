@@ -5,11 +5,11 @@ class AuthController {
   // Register new user
   static async signup(req, res) {
     try {
-      const { email, password, name, role, phone, company_name, address } = req.body;
+      const { email, password, name, role, phone, company_name, address, country } = req.body;
 
       // Validate required fields
-      if (!email || !password || !name || !role) {
-        return res.status(400).json({ error: 'Email, password, name, and role are required' });
+      if (!email || !password || !name || !role || !country) {
+        return res.status(400).json({ error: 'Email, password, name, role, and country are required' });
       }
 
       // Validate email format
@@ -50,6 +50,9 @@ class AuthController {
         }
         if (!address) {
           return res.status(400).json({ error: 'Address is required for seller accounts' });
+        }
+        if (!country) {
+          return res.status(400).json({ error: 'Country is required for seller accounts' });
         }
       }
       
@@ -145,7 +148,7 @@ class AuthController {
   // Update user profile
   static async updateProfile(req, res) {
     try {
-      const allowedUpdates = ['name', 'phone', 'address', 'company_name'];
+      const allowedUpdates = ['name', 'phone', 'address', 'company_name', 'country'];
       const updates = Object.keys(req.body)
         .filter(key => allowedUpdates.includes(key))
         .reduce((obj, key) => {
