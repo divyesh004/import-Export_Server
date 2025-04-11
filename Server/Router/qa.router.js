@@ -20,11 +20,46 @@ router.get('/questions',
   QAController.getUserQuestions
 );
 
-// Get all questions (Admin/Seller/Sub-Admin only)
+// Get all questions (Admin/Sub-Admin only)
 router.get('/questions/all',
   authenticateToken,
-  authorizeRoles('seller', 'admin', 'sub-admin'),
+  authorizeRoles('admin', 'sub-admin'),
   QAController.getAllQuestions
+);
+
+// Get approved questions (Seller only)
+router.get('/questions/approved',
+  authenticateToken,
+  authorizeRoles('seller'),
+  QAController.getAllQuestions
+);
+
+// Get pending questions for moderation (Admin/Sub-Admin only)
+router.get('/questions/pending',
+  authenticateToken,
+  authorizeRoles('admin', 'sub-admin'),
+  QAController.getPendingQuestions
+);
+
+// Get pending answers for moderation (Admin/Sub-Admin only)
+router.get('/answers/pending',
+  authenticateToken,
+  authorizeRoles('admin', 'sub-admin'),
+  QAController.getPendingAnswers
+);
+
+// Approve or reject a question (Admin/Sub-Admin only)
+router.patch('/questions/:id/status',
+  authenticateToken,
+  authorizeRoles('admin', 'sub-admin'),
+  QAController.updateQuestionStatus
+);
+
+// Approve or reject an answer (Admin/Sub-Admin only)
+router.patch('/answers/:id/status',
+  authenticateToken,
+  authorizeRoles('admin', 'sub-admin'),
+  QAController.updateAnswerStatus
 );
 
 // Get all questions for a product
