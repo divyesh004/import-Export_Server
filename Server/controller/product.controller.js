@@ -68,7 +68,7 @@ class ProductController {
       }
 
       // Extract and validate required fields
-      const { name, description, price, imageUrls, category, availability, brand, key_features, specification } = req.body;
+      const { name, description, price, imageUrls: image_url, category, availability, brand, key_features, specification } = req.body;
 
       // Validate basic required fields
       if (!name || !description || !category || name.toString().length === 0 || description.toString().length === 0 || category.toString().length === 0) {
@@ -94,13 +94,13 @@ class ProductController {
       }
 
       // Validate image URLs
-      if (!Array.isArray(imageUrls) || imageUrls.length === 0) {
-        console.error('Invalid image URLs:', imageUrls);
+      if (!Array.isArray(image_url) || image_url.length === 0) {
+        console.error('Invalid image URLs:', image_url);
         return res.status(400).json({ error: 'Please provide at least one valid image URL' });
       }
 
       // Process and validate each image URL
-      const validatedImageUrls = imageUrls
+      const validatedImageUrls = image_url
         .map(url => url?.toString())
         .filter(url => {
           if (!url) return false;
@@ -146,7 +146,7 @@ class ProductController {
         name: name.toString(),
         description: description.toString(),
         price: parsedPrice,
-        industry: category.toString().toLowerCase(), // Changed from category to industry to match model expectation
+        category: category.toString().toLowerCase(),
         image_url: validatedImageUrls, // Changed from imageUrls to image_url to match model expectation
         seller_id: req.user.id,
         availability: availability,
@@ -208,9 +208,64 @@ class ProductController {
   // Update product (Seller/Admin)
   static async updateProduct(req, res) {
     try {
-      const product = await ProductModel.updateProduct(req.params.id, req.body, req.user.id);
+      if (!req.user?.id) {
+        return res.status(401).json({ error: 'Unauthorized access' });
+      }
+
+      // Extract and validate fields
+      const { name, description, price, imageUrls, category, availability, brand, key_features, specification } = req.body;
+
+      // Prepare update data with proper field mapping
+      const updateData = {
+        ...(name && { name: name.toString() }),
+        ...(description && { description: description.toString() }),
+        ...(price && { price: parseFloat(price) }),
+        ...(category && { industry: category.toString().toLowerCase() }),
+        ...(availability && { availability }),
+        ...(brand && { brand }),
+        ...(key_features && { key_features }),
+        ...(specification && { specification })
+      };
+
+      // Validate price if provided
+      if (price !== undefined) {
+        const parsedPrice = parseFloat(price);
+        if (isNaN(parsedPrice) || parsedPrice <= 0) {
+          return res.status(400).json({ error: 'Price must be a positive number' });
+        }
+      }
+
+      // Validate image URLs if provided
+      if (imageUrls) {
+        if (!Array.isArray(imageUrls)) {
+          return res.status(400).json({ error: 'Image URLs must be provided as an array' });
+        }
+
+        const validatedImageUrls = imageUrls
+          .map(url => url?.toString())
+          .filter(url => {
+            if (!url) return false;
+            try {
+              new URL(url);
+              return url.startsWith('http');
+            } catch {
+              return false;
+            }
+          });
+
+        if (imageUrls.length > 0 && validatedImageUrls.length === 0) {
+          return res.status(400).json({ error: 'Please provide at least one valid image URL' });
+        }
+
+        updateData.image_url = validatedImageUrls;
+
+        updateData.image_url = validatedImageUrls;
+      }
+
+      const product = await ProductModel.updateProduct(req.params.id, updateData, req.user.id);
       res.json(product);
     } catch (error) {
+      console.error('Error updating product:', error);
       res.status(400).json({ error: error.message });
     }
   }
@@ -241,7 +296,7 @@ class ProductController {
 
       // For sub-admin, check if product belongs to their industry
       if (req.user.role === 'sub-admin') {
-        if (product.category !== req.user.industry) {
+        if (product.category !== req.user.category) {
           return res.status(403).json({ error: 'You can only manage products from your assigned industry' });
         }
       }
@@ -334,14 +389,14 @@ class ProductController {
       }
 
       // Get the sub-admin's industry
-      const industry = req.user.industry;
-      if (!industry) {
-        return res.status(400).json({ error: 'No industry assigned to this sub-admin' });
+      const category = req.user.category;
+      if (!category) {
+        return res.status(400).json({ error: 'No category assigned to this sub-admin' });
       }
 
       // Use ProductModel to find products by category and status
       const products = await ProductModel.findAll({ 
-        category: industry, // Filter by category matching sub-admin's industry
+        category: category,
         status: 'approved' 
       });
 
@@ -367,14 +422,14 @@ class ProductController {
       }
 
       // Get the sub-admin's industry
-      const industry = req.user.industry;
-      if (!industry) {
-        return res.status(400).json({ error: 'No industry assigned to this sub-admin' });
+      const category = req.user.category;
+      if (!category) {
+        return res.status(400).json({ error: 'No category assigned to this sub-admin' });
       }
 
       // Use ProductModel to find products by category and status
       const products = await ProductModel.findAll({ 
-        category: industry, // Filter by category matching sub-admin's industry
+        category: category,
         status: 'pending' 
       });
 
@@ -400,14 +455,14 @@ class ProductController {
       }
 
       // Get the sub-admin's industry
-      const industry = req.user.industry;
-      if (!industry) {
-        return res.status(400).json({ error: 'No industry assigned to this sub-admin' });
+      const category = req.user.category;
+      if (!category) {
+        return res.status(400).json({ error: 'No category assigned to this sub-admin' });
       }
 
       // Use ProductModel to find products by category and status
       const products = await ProductModel.findAll({ 
-        category: industry, // Filter by category matching sub-admin's industry
+        category: category,
         status: 'rejected' 
       });
 

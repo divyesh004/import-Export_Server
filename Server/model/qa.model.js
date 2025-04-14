@@ -135,16 +135,16 @@ class QAModel {
       .select(`
         *,
         users!questions_user_id_fkey(name),
-        products!inner(*)
+        products(*)
       `)
       .order('created_at', { ascending: false });
-      
+
     // Filter by status if provided
     if (status) {
       query = query.eq('status', status);
     } else {
-      // If no status filter is provided, only show approved questions to everyone
-      // This ensures sellers only see questions that have been approved by admin/sub-admin
+      // If no status filters provided, only show approved questions to everyone
+      // This ensures sellers only see questions that have been approved by admin
       query = query.eq('status', 'approved');
     }
 
@@ -164,31 +164,34 @@ class QAModel {
       throw new Error(error.message);
     }
 
-    // Get answers for all questions
-    if (questions && questions.length > 0) {
-      // Get all question IDs
-      const questionIds = questions.map(q => q.id);
-      
-      // Fetch all answers for these questions in a single query
-      const { data: allAnswers, error: answersError } = await supabase
-        .from('answers')
-        .select('*, users!answers_seller_id_fkey(name)')
-        .in('question_id', questionIds)
-        .eq('status', 'approved') // Only return approved answers
-        .order('created_at', { ascending: true });
+    // Return empty array if no questions found
+    if (!questions || questions.length === 0) {
+      return [];
+    }
 
-      if (answersError) {
-        console.error('Error fetching answers:', answersError);
-      } else if (allAnswers && allAnswers.length > 0) {
-        // Add the first answer to each question
-        questions.forEach(question => {
-          const questionAnswers = allAnswers.filter(a => a.question_id === question.id);
-          if (questionAnswers.length > 0) {
-            question.answer = questionAnswers[0].answer;
-            question.answered_at = questionAnswers[0].created_at;
-          }
-        });
-      }
+    // Get all question IDs
+    const questionIds = questions.map(q => q.id);
+    
+    // Fetch all answers for these questions in a single query
+    const { data: allAnswers, error: answersError } = await supabase
+      .from('answers')
+      .select('*, users!answers_seller_id_fkey(name)')
+      .in('question_id', questionIds)
+      .eq('status', 'approved') // Only return approved answers
+      .order('created_at', { ascending: true });
+
+    if (answersError) {
+      console.error('Error fetching answers:', answersError);
+    } else if (allAnswers && allAnswers.length > 0) {
+      // Add answers to their respective questions
+      questions.forEach(question => {
+        const questionAnswers = allAnswers.filter(a => a.question_id === question.id);
+        if (questionAnswers.length > 0) {
+          question.answers = questionAnswers;
+        } else {
+          question.answers = [];
+        }
+      });
     }
 
     return questions;
@@ -217,6 +220,11 @@ class QAModel {
       throw new Error(error.message);
     }
 
+    // Return empty array if no questions found
+    if (!questions || questions.length === 0) {
+      return [];
+    }
+
     return questions;
   }
 
@@ -241,6 +249,11 @@ class QAModel {
 
     if (error) {
       throw new Error(error.message);
+    }
+
+    // Return empty array if no questions found
+    if (!questions || questions.length === 0) {
+      return [];
     }
 
     return questions;

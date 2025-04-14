@@ -61,7 +61,7 @@ const productValidationRules = {
     body('imageUrls').isArray().withMessage('Images must be an array').custom((value) => {
       if (!value || value.length === 0) {
         throw new Error('At least one image is required');
-      }
+      } 
       return true;
     })
   ],
@@ -74,6 +74,7 @@ const productValidationRules = {
       .notEmpty().withMessage('Product category cannot be empty')
       .isIn(['electronics', 'clothing', 'accessories', 'footwear', 'electronics', 'home', 'beauty'])
       .withMessage('Invalid product category'),
+      
     body('status').optional().isIn(['pending', 'approved', 'rejected']).withMessage('Invalid status')
   ]
 };

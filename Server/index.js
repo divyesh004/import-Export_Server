@@ -1,9 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-require('dotenv').config();
 
 const app = express();
 
@@ -48,6 +48,7 @@ app.use('/cart', require('./Router/cart.router'));
 app.use('/qa', require('./Router/qa.router'));
 app.use('/analytics', require('./Router/analytics.router'));
 
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -59,7 +60,7 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
