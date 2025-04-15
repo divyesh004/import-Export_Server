@@ -47,6 +47,7 @@ app.use('/orders', require('./Router/order.router'));
 app.use('/cart', require('./Router/cart.router'));
 app.use('/qa', require('./Router/qa.router'));
 app.use('/analytics', require('./Router/analytics.router'));
+app.use('/price', require('./Router/price.router'));
 
 
 // Error handling middleware
