@@ -37,21 +37,22 @@ Use the following data sources and parameters:
 Output Format  (For USA):
 
 1. China Price Data:
-   - Min: $20
-   - Max: $35
-   - Avg: $27
-   - Price Trend: Up
+   - Min: $${chinaMin}
+   - Max: $${chinaMax}
+   - Avg: $${chinaAvg}
+   - Price Trend: ${priceTrend}
 
-2. Tariff & Trade Info (for USA):
-   - Tariff Rate: 15%
-   - Trade Notes: No FTA, Standard electronics tariff
+2. Tariff & Trade Info (for ${targetCountry}):
+   - Tariff Rate: ${tariffRate}%
+   - Trade Notes: ${tradeNotes}
 
 3. Ministry/Official Data:
-   - Taxes/Duties: 8% import tax
-   - Special Rules: No restrictions for import
+   - Taxes/Duties: ${taxes}
+   - Special Rules: ${specialRules}
 
-✅ Final AI Recommended Selling Price: $42
-- Reason: The price includes sourcing cost, 15% tariff, 8% tax, and allows 20% profit margin. Compliant with regulations.
+✅ Final AI Recommended Selling Price: $${finalPrice}
+- Reason: ${reason}
+
 `;
   }
 
