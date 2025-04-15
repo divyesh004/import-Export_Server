@@ -14,6 +14,11 @@ Use the following data sources and parameters:
 1. China Market Price:
    - Get the minimum, maximum, and average product price from China.
    - Include recent trends if available (e.g., price up/down in last 3 months).
+   
+1a. Alibaba Price Data:
+   - Include minimum, maximum, and average product prices from Alibaba marketplace.
+   - Compare Alibaba prices with general China market prices.
+   - Note any significant price differences between Alibaba and other Chinese suppliers.
 
 2. Country-Specific Tariff (focus on USA):
    - What are the import/export tariffs for the selected country (especially the USA)?
@@ -37,6 +42,12 @@ IMPORTANT: You MUST replace ALL placeholder text with actual data in your respon
    - Max: $X (provide actual maximum price from China market research)
    - Avg: $X (provide actual average price from China market research)
    - Price Trend: (state whether prices are "Increasing", "Decreasing", or "Stable" based on research)
+
+1a. Alibaba Price Data:
+   - Min: $X (provide actual minimum price from Alibaba marketplace)
+   - Max: $X (provide actual maximum price from Alibaba marketplace)
+   - Avg: $X (provide actual average price from Alibaba marketplace)
+   - Alibaba vs Other Chinese Suppliers: (note any significant price differences)
 
 2. Tariff & Trade Info (for USA or specified target country):
    - Tariff Rate: X% (provide the exact applicable tariff rate percentage)
