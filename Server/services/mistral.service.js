@@ -30,22 +30,26 @@ Use the following data sources and parameters:
    
 Output Format (For USA):
 
-1. China Price Data:
-   - Min: $[Insert minimum price from China market research]
-   - Max: $[Insert maximum price from China market research]
-   - Avg: $[Insert average price from China market research]
-   - Price Trend: [Insert price trend information, e.g., "Increasing", "Decreasing", or "Stable"]
+IMPORTANT: You MUST replace ALL placeholder text with actual data in your response. Do not leave any placeholders like [Insert...] in your final output.
 
-2. Tariff & Trade Info (for [Insert target country name]):
-   - Tariff Rate: [Insert applicable tariff rate]%
-   - Trade Notes: [Insert relevant trade agreements, restrictions, or other notes]
+1. China Price Data:
+   - Min: $X (provide actual minimum price from China market research)
+   - Max: $X (provide actual maximum price from China market research)
+   - Avg: $X (provide actual average price from China market research)
+   - Price Trend: (state whether prices are "Increasing", "Decreasing", or "Stable" based on research)
+
+2. Tariff & Trade Info (for USA or specified target country):
+   - Tariff Rate: X% (provide the exact applicable tariff rate percentage)
+   - Trade Notes: (provide detailed information about relevant trade agreements, restrictions, or other notes)
 
 3. Ministry/Official Data:
-   - Taxes/Duties: [Insert applicable taxes and duties]
-   - Special Rules: [Insert any special regulations or rules for this product]
+   - Taxes/Duties: (list all applicable taxes and duties with percentages or amounts)
+   - Special Rules: (detail any special regulations or rules for this product)
 
-✅ Final AI Recommended Selling Price: $[Insert your calculated recommended price]
-- Reason: [Explain your price recommendation with clear reasoning]
+✅ Final AI Recommended Selling Price: $X (provide your calculated recommended price)
+- Reason: (provide a detailed explanation of your price recommendation with clear reasoning)
+
+You MUST complete ALL sections above with actual data. Do not skip any section or leave any placeholders.
 `;
   }
 
