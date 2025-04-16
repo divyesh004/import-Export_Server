@@ -78,8 +78,8 @@ You MUST complete ALL sections above with actual data. Do not skip any section o
 Product: ${productData.name}\nDescription: ${productData.description}\nCategory: ${productData.category}\nCurrent Price: $${productData.price}\nBrand: ${productData.brand}\nTarget Country: USA` 
             }
           ],
-          temperature: 0.7,
-          max_tokens: 50000
+          temperature: 0.4,
+          max_tokens: 2000
         },
         {
           headers: {
