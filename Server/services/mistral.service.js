@@ -79,7 +79,7 @@ Product: ${productData.name}\nDescription: ${productData.description}\nCategory:
             }
           ],
           temperature: 0.7,
-          max_tokens: 20000
+          max_tokens: 200000000
         },
         {
           headers: {
