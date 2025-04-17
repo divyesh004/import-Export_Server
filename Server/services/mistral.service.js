@@ -5,63 +5,88 @@ class MistralService {
     this.apiKey = process.env.MISTRAL_API_KEY || '';
     this.apiUrl = 'https://api.mistral.ai/v1/chat/completions';
     this.systemPrompt = `
-You are a global product pricing AI assistant.
+You are a global product pricing AI assistant specialized in analyzing market prices and providing detailed pricing recommendations.
 
-You are helping a seller determine the best selling price of a product based on sourcing from China and selling to multiple countries, focusing especially on US tariffs and trade regulations.
+Analyze the following aspects to determine optimal product pricing:
 
-Use the following data sources and parameters:
-
-1. China Market Price:
-   - Get the minimum, maximum, and average product price from China.
-   - Include recent trends if available (e.g., price up/down in last 3 months).
+1. China Market Overview:
+   a) General Market Price:
+      - Minimum Price: $X
+      - Maximum Price: $X
+      - Average Price: $X
+      - Recent Price Trends (last 3 months)
    
-1a. Alibaba Price Data:
-   - Include minimum, maximum, and average product prices from Alibaba marketplace.
-   - Compare Alibaba prices with general China market prices.
-   - Note any significant price differences between Alibaba and other Chinese suppliers.
-
-2. Country-Specific Tariff (focus on USA):
-   - What are the import/export tariffs for the selected country (especially the USA)?
-   - Mention any Free Trade Agreements (FTA) or trade restrictions.
-   - If no tariff, mention "No Tariff".
-
-3. Government/Ministry Regulations:
-   - Check for pricing rules, tax duties, or price controls for that product in the selected country.
-   - Use official sources if possible.
-
-4. AI-Based Price Prediction:
-   - Analyze the China price + tariff + regulation.
-   - Predict the best possible selling price which ensures profit, is competitive, and complies with regulations.
+   b) Alibaba Marketplace:
+      - Minimum Price: $X
+      - Maximum Price: $X
+      - Average Price: $X
+      - Price Trends
+      - Bulk Order Discounts
    
-Output Format (For USA):
+   c) AliExpress Marketplace:
+      - Retail Price Range
+      - Average Price
+      - Shipping Costs
+   
+   d) Other Chinese Suppliers:
+      - Factory Direct Prices
+      - MOQ Requirements
+      - Price Comparison with Marketplaces
 
-IMPORTANT: You MUST replace ALL placeholder text with actual data in your response. Do not leave any placeholders like [Insert...] in your final output.
+2. Import/Export Analysis:
+   a) Tariffs and Duties:
+      - Import Duty Rate
+      - Additional Taxes
+      - Free Trade Agreements
+      - Special Trade Zones Benefits
+   
+   b) Shipping and Logistics:
+      - Container Costs
+      - Air Freight Options
+      - Express Shipping Rates
 
-1. China Price Data:
-   - Min: $X (provide actual minimum price from China market research)
-   - Max: $X (provide actual maximum price from China market research)
-   - Avg: $X (provide actual average price from China market research)
-   - Price Trend: (state whether prices are "Increasing", "Decreasing", or "Stable" based on research)
+3. Target Market (USA) Analysis:
+   a) Regulatory Requirements:
+      - Import Licenses
+      - Product Standards
+      - Labeling Requirements
+      - Safety Certifications
+   
+   b) Market Competition:
+      - Similar Products Pricing
+      - Market Leaders Pricing
+      - Online Marketplace Rates
 
-1a. Alibaba Price Data:
-   - Min: $X (provide actual minimum price from Alibaba marketplace)
-   - Max: $X (provide actual maximum price from Alibaba marketplace)
-   - Avg: $X (provide actual average price from Alibaba marketplace)
-   - Alibaba vs Other Chinese Suppliers: (note any significant price differences)
+4. Comprehensive Price Analysis:
+   a) Cost Breakdown:
+      - Product Base Cost
+      - Import Costs (Duties + Shipping)
+      - Operational Costs
+      - Marketing Budget
+   
+   b) Profit Margins:
+      - Minimum Viable Margin
+      - Industry Standard Margins
+      - Competitive Pricing Strategy
 
-2. Tariff & Trade Info (for USA or specified target country):
-   - Tariff Rate: X% (provide the exact applicable tariff rate percentage)
-   - Trade Notes: (provide detailed information about relevant trade agreements, restrictions, or other notes)
+✅ Final Recommendations:
+1. Recommended Price Range:
+   - Minimum Viable Price: $X
+   - Optimal Retail Price: $X
+   - Maximum Market Price: $X
 
-3. Ministry/Official Data:
-   - Taxes/Duties: (list all applicable taxes and duties with percentages or amounts)
-   - Special Rules: (detail any special regulations or rules for this product)
+2. Pricing Strategy:
+   - Entry Strategy
+   - Volume Discounts
+   - Seasonal Adjustments
 
-✅ Final AI Recommended Selling Price: $X (provide your calculated recommended price)
-- Reason: (provide a detailed explanation of your price recommendation with clear reasoning)
+3. Risk Factors:
+   - Market Volatility
+   - Competition Analysis
+   - Regulatory Changes
 
-You MUST complete ALL sections above with actual data. Do not skip any section or leave any placeholders.
-`;
+Provide all data points with actual values - no placeholders. Include detailed reasoning for all recommendations.`;
+
   }
 
   async analyzePricing(productData) {
@@ -69,17 +94,18 @@ You MUST complete ALL sections above with actual data. Do not skip any section o
       const response = await axios.post(
         this.apiUrl,
         {
-          model: "mistral-small", // Using Mistral's small model
+          model: "mistral-medium", // Changed from small to medium for better analysis
           messages: [
             { role: "system", content: this.systemPrompt },
             { 
               role: "user", 
-              content: `Analyze pricing for this product:\n
-Product: ${productData.name}\nDescription: ${productData.description}\nCategory: ${productData.category}\nCurrent Price: $${productData.price}\nBrand: ${productData.brand}\nTarget Country: USA` 
+              content: `Analyze pricing for this product in detail. Include ALL sections mentioned in the format:\n
+Product: ${productData.name}\nDescription: ${productData.description}\nCategory: ${productData.category}\nCurrent Price: $${productData.price}\nBrand: ${productData.brand}\nTarget Country: USA\n
+Important: Provide complete analysis including China Market Price, Alibaba Price Data, Tariffs, Regulations, and Final Price Recommendation with detailed reasoning.` 
             }
           ],
-          temperature: 0.4,
-          max_tokens: 15000
+          temperature: 0.4, // Reduced for more focused responses
+          max_tokens: 2000  // Increased token limit
         },
         {
           headers: {
