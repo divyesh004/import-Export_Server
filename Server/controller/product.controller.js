@@ -296,7 +296,7 @@ class ProductController {
 
       // For sub-admin, check if product belongs to their category
       if (req.user.role === 'sub-admin') {
-        if (product.category !== req.user.category) {
+        if (product.category !== req.user.industry) {
           return res.status(403).json({ error: 'You can only manage products from your assigned category' });
         }
       }
