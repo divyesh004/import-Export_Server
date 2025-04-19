@@ -220,7 +220,7 @@ class ProductController {
         ...(name && { name: name.toString() }),
         ...(description && { description: description.toString() }),
         ...(price && { price: parseFloat(price) }),
-        ...(category && { industry: category.toString().toLowerCase() }),
+        ...(category && { category: category.toString().toLowerCase() }),
         ...(availability && { availability }),
         ...(brand && { brand }),
         ...(key_features && { key_features }),
@@ -294,10 +294,10 @@ class ProductController {
         return res.status(404).json({ error: 'Product not found' });
       }
 
-      // For sub-admin, check if product belongs to their industry
+      // For sub-admin, check if product belongs to their category
       if (req.user.role === 'sub-admin') {
         if (product.category !== req.user.category) {
-          return res.status(403).json({ error: 'You can only manage products from your assigned industry' });
+          return res.status(403).json({ error: 'You can only manage products from your assigned category' });
         }
       }
 
@@ -388,8 +388,8 @@ class ProductController {
         return res.status(403).json({ error: 'Access denied. Sub-admin only.' });
       }
 
-      // Get the sub-admin's industry
-      const category = req.user.category;
+      // Get the sub-admin's category
+      const category = req.user.industry;
       if (!category) {
         return res.status(400).json({ error: 'No category assigned to this sub-admin' });
       }
@@ -400,7 +400,7 @@ class ProductController {
         status: 'approved' 
       });
 
-      console.log(`Found ${products.length} approved products for industry ${industry}`);
+      console.log(`Found ${products.length} approved products for category ${category}`);
       res.json(products);
     } catch (error) {
       console.error('Error in getIndustryApprovedProducts:', error);
@@ -422,7 +422,7 @@ class ProductController {
       }
 
       // Get the sub-admin's industry
-      const category = req.user.category;
+      const category = req.user.industry;
       if (!category) {
         return res.status(400).json({ error: 'No category assigned to this sub-admin' });
       }
@@ -433,7 +433,7 @@ class ProductController {
         status: 'pending' 
       });
 
-      console.log(`Found ${products.length} pending products for industry ${industry}`);
+      console.log(`Found ${products.length} pending products for category ${category}`);
       res.json(products);
     } catch (error) {
       console.error('Error in getIndustryPendingProducts:', error);
@@ -455,7 +455,7 @@ class ProductController {
       }
 
       // Get the sub-admin's industry
-      const category = req.user.category;
+      const category = req.user.industry;
       if (!category) {
         return res.status(400).json({ error: 'No category assigned to this sub-admin' });
       }
@@ -466,7 +466,7 @@ class ProductController {
         status: 'rejected' 
       });
 
-      console.log(`Found ${products.length} rejected products for industry ${industry}`);
+      console.log(`Found ${products.length} rejected products for category ${category}`);
       res.json(products);
     } catch (error) {
       console.error('Error in getIndustryRejectedProducts:', error);
