@@ -82,10 +82,27 @@ const productValidationRules = {
 const orderValidationRules = {
   create: [
     body('product_id').isUUID().withMessage('Invalid product ID'),
-    body('quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1')
+    body('quantity').isInt({ min: 1 }).withMessage('Quantity must be at least 1'),
+    body('shipping_address').notEmpty().withMessage('Shipping address is required')
   ],
   updateStatus: [
-    body('status').isIn(['pending', 'shipped', 'delivered', 'cancelled']).withMessage('Invalid status')
+    body('status').isIn(['pending_approval', 'approved', 'rejected', 'confirmed', 'in_progress', 'dispatched', 'delivered', 'cancelled'])
+      .withMessage('Invalid status'),
+    body('fulfillment_details').optional()
+  ],
+  approveReject: [
+    body('status').isIn(['approved', 'rejected']).withMessage('Status must be either approved or rejected'),
+    body('reason').optional().notEmpty().withMessage('Reason cannot be empty if provided')
+  ],
+  confirmOrder: [
+    body('fulfillment_details').notEmpty().withMessage('Fulfillment details are required')
+      .isObject().withMessage('Fulfillment details must be an object'),
+    body('fulfillment_details.shipping_partner').notEmpty().withMessage('Shipping partner is required'),
+    body('fulfillment_details.estimated_delivery').notEmpty().withMessage('Estimated delivery date is required'),
+    body('fulfillment_details.tracking_number').optional()
+  ],
+  cancelOrder: [
+    body('reason').optional().notEmpty().withMessage('Reason cannot be empty if provided')
   ]
 };
 

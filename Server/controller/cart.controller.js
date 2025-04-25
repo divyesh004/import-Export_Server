@@ -50,14 +50,21 @@ class CartController {
         return res.status(400).json({ error: 'Cart is empty' });
       }
 
+      // Validate shipping address
+      const { shipping_address } = req.body;
+      if (!shipping_address) {
+        return res.status(400).json({ error: 'Shipping address is required' });
+      }
+
       // Create orders for each cart item
-      const OrderModel = require('../model/order.model');
+      const { OrderModel, ORDER_STATUS } = require('../model/order.model');
       const orders = [];
 
       for (const item of cartItems) {
         const order = await OrderModel.createOrder({
           product_id: item.product_id,
-          quantity: item.quantity
+          quantity: item.quantity,
+          shipping_address
         }, req.user.id);
         orders.push(order);
       }
@@ -66,7 +73,7 @@ class CartController {
       await CartModel.clearCart(req.user.id);
 
       res.status(201).json({
-        message: 'Checkout successful',
+        message: 'Checkout successful. Your orders are pending approval from admin.',
         orders
       });
     } catch (error) {
