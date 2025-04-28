@@ -68,9 +68,16 @@ class OrderModel {
           ORDER_STATUS.CANCELLED
         ]);
     } else if (role === 'seller') {
-      // Sellers can only see approved or later orders for their products
+      // Sellers can see approved orders and later status orders for their products
       query = query.eq('products.seller_id', userId)
-        .not('status', 'in', [ORDER_STATUS.PENDING_APPROVAL, ORDER_STATUS.REJECTED]);
+        .in('status', [
+          ORDER_STATUS.APPROVED,
+          ORDER_STATUS.CONFIRMED,
+          ORDER_STATUS.IN_PROGRESS,
+          ORDER_STATUS.DISPATCHED,
+          ORDER_STATUS.DELIVERED,
+          ORDER_STATUS.CANCELLED
+        ]);
     } else if (role === 'sub_admin') {
       // Sub-admins can see orders from their assigned industry
       // This requires a join with products and industries tables
@@ -104,9 +111,16 @@ class OrderModel {
           ORDER_STATUS.CANCELLED
         ]);
     } else if (filters.role === 'seller' && filters.userId) {
-      // Sellers can only see approved or later orders for their products
+      // Sellers can see approved orders and later status orders for their products
       query = query.eq('products.seller_id', filters.userId)
-        .not('status', 'in', [ORDER_STATUS.PENDING_APPROVAL, ORDER_STATUS.REJECTED]);
+        .in('status', [
+          ORDER_STATUS.APPROVED,
+          ORDER_STATUS.CONFIRMED,
+          ORDER_STATUS.IN_PROGRESS,
+          ORDER_STATUS.DISPATCHED,
+          ORDER_STATUS.DELIVERED,
+          ORDER_STATUS.CANCELLED
+        ]);
     } else if (filters.role === 'sub_admin' && filters.industry_id) {
       // Sub-admins can see orders from their assigned industry
       // This requires a join with products and industries tables
