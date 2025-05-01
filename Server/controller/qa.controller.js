@@ -41,7 +41,23 @@ class QAController {
         return res.status(403).json({ error: 'Access denied. Admin or sub-admin only.' });
       }
 
-      const questions = await QAModel.getPendingQuestions(req.user.id, req.user.role, req.user.industry);
+      // Check for custom headers sent from frontend
+      // Make sure we're using the correct header names as sent from frontend
+      const userRole = req.headers['x-user-role'] || req.user.role;
+      const userIndustry = req.headers['x-user-industry'] || req.user.industry;
+      
+      // Debug logging
+      // Only log in development mode
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Headers received:', req.headers);
+        console.log('Getting pending questions for user - Role:', userRole, 'Industry:', userIndustry);
+      }
+
+      const questions = await QAModel.getPendingQuestions(req.user.id, userRole, userIndustry);
+      // Only log in development mode
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`Found ${questions.length} pending questions`);
+      }
       res.json(questions);
     } catch (error) {
       console.error('Error getting pending questions:', error);
@@ -63,7 +79,23 @@ class QAController {
         return res.status(403).json({ error: 'Access denied. Admin or sub-admin only.' });
       }
 
-      const answers = await QAModel.getPendingAnswers(req.user.id, req.user.role, req.user.industry);
+      // Check for custom headers sent from frontend
+      // Make sure we're using the correct header names as sent from frontend
+      const userRole = req.headers['x-user-role'] || req.user.role;
+      const userIndustry = req.headers['x-user-industry'] || req.user.industry;
+      
+      // Debug logging
+      // Only log in development mode
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Headers received:', req.headers);
+        console.log('Getting pending answers for user - Role:', userRole, 'Industry:', userIndustry);
+      }
+
+      const answers = await QAModel.getPendingAnswers(req.user.id, userRole, userIndustry);
+      // Only log in development mode
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`Found ${answers.length} pending answers`);
+      }
       res.json(answers);
     } catch (error) {
       console.error('Error getting pending answers:', error);
@@ -168,12 +200,23 @@ class QAController {
         return res.status(400).json({ error: 'Invalid status. Must be approved or rejected' });
       }
 
+      // Make sure we're using the correct header names as sent from frontend
+      const userRole = req.headers['x-user-role'] || req.user.role;
+      const userIndustry = req.headers['x-user-industry'] || req.user.industry;
+      
+      // Debug logging
+      // Only log in development mode
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Headers received:', req.headers);
+        console.log('Updating question status - Role:', userRole, 'Industry:', userIndustry);
+      }
+
       const updatedQuestion = await QAModel.updateQuestionStatus(
         req.params.id, 
         status, 
         req.user.id, 
-        req.user.role, 
-        req.user.industry
+        userRole, 
+        userIndustry
       );
       
       let message = `Question ${status === 'approved' ? 'approved' : 'rejected'} successfully`;
@@ -210,12 +253,23 @@ class QAController {
         return res.status(400).json({ error: 'Invalid status. Must be approved or rejected' });
       }
 
+      // Make sure we're using the correct header names as sent from frontend
+      const userRole = req.headers['x-user-role'] || req.user.role;
+      const userIndustry = req.headers['x-user-industry'] || req.user.industry;
+      
+      // Debug logging
+      // Only log in development mode
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Headers received:', req.headers);
+        console.log('Updating answer status - Role:', userRole, 'Industry:', userIndustry);
+      }
+
       const updatedAnswer = await QAModel.updateAnswerStatus(
         req.params.id, 
         status, 
         req.user.id, 
-        req.user.role, 
-        req.user.industry
+        userRole, 
+        userIndustry
       );
       
       let message = `Answer ${status === 'approved' ? 'approved' : 'rejected'} successfully`;

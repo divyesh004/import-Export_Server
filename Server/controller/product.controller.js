@@ -16,12 +16,16 @@ class ProductController {
   static async getPendingProducts(req, res) {
     try {
       if (!req.user) {
-        console.error('Unauthorized access attempt: No user found');
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Unauthorized access attempt: No user found');
+        }
         return res.status(401).json({ error: 'Unauthorized access' });
       }
 
       if (req.user.role !== 'admin' && req.user.role !== 'seller' && req.user.role !== 'sub-admin') {
-        console.error(`Access denied for role: ${req.user.role}`);
+        if (process.env.NODE_ENV !== 'production') {
+          console.error(`Access denied for role: ${req.user.role}`);
+        }
         return res.status(403).json({ error: 'Access denied. Admin or seller only.' });
       }
 
@@ -30,18 +34,29 @@ class ProductController {
         filters.seller_id = req.user.id;
       }
 
+      // Only log in development mode
+    if (process.env.NODE_ENV !== 'production') {
       console.log('Fetching pending products with filters:', filters);
+    }
       const products = await ProductModel.findAll(filters);
       
       if (!products || products.length === 0) {
+        // Only log in development mode
+      if (process.env.NODE_ENV !== 'production') {
         console.log('No pending products found');
+      }
         return res.json([]);
       }
 
-      console.log(`Found ${products.length} pending products`);
+      // Only log in development mode
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`Found ${products.length} pending products`);
+      }
       res.json(products);
     } catch (error) {
-      console.error('Error in getPendingProducts:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error in getPendingProducts:', error);
+      }
       res.status(500).json({ error: 'Failed to fetch pending products' });
     }
   }
@@ -63,7 +78,9 @@ class ProductController {
     try {
       // Validate user authentication and role
       if (!req.user?.id || req.user.role !== 'seller') {
-        console.error('Unauthorized product creation attempt:', { userId: req.user?.id, role: req.user?.role });
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Unauthorized product creation attempt:', { userId: req.user?.id, role: req.user?.role });
+        }
         return res.status(401).json({ error: 'Only sellers can create products' });
       }
 
@@ -72,14 +89,18 @@ class ProductController {
 
       // Validate basic required fields
       if (!name || !description || !category || name.toString().length === 0 || description.toString().length === 0 || category.toString().length === 0) {
-        console.error('Missing required fields:', { name, description, category });
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Missing required fields:', { name, description, category });
+        }
         return res.status(400).json({ error: 'Name, description and category are required' });
       }
 
       // Validate category
       const validCategories = ['clothing', 'accessories', 'footwear', 'electronics', 'home', 'beauty'];
       if (!validCategories.includes(category.toString().toLowerCase())) {
-        console.error('Invalid category:', category);
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Invalid category:', category);
+        }
         return res.status(400).json({
           error: 'Invalid category. Please select a valid category',
           validCategories
@@ -89,13 +110,17 @@ class ProductController {
       // Validate and parse price
       const parsedPrice = parseFloat(price);
       if (isNaN(parsedPrice) || parsedPrice <= 0) {
-        console.error('Invalid price:', price);
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Invalid price:', price);
+        }
         return res.status(400).json({ error: 'value must be a positive number' });
       }
 
       // Validate image URLs
       if (!Array.isArray(image_url) || image_url.length === 0) {
-        console.error('Invalid image URLs:', image_url);
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Invalid image URLs:', image_url);
+        }
         return res.status(400).json({ error: 'Please provide at least one valid image URL' });
       }
 
@@ -113,31 +138,41 @@ class ProductController {
         });
 
       if (validatedImageUrls.length === 0) {
-        console.error('No valid image URLs provided');
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('No valid image URLs provided');
+        }
         return res.status(400).json({ error: 'Please provide at least one valid image URL' });
       }
       
       // Validate availability
       if (!availability) {
-        console.error('Missing availability');
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Missing availability');
+        }
         return res.status(400).json({ error: 'Availability is required' });
       }
       
       // Validate brand
       if (!brand) {
-        console.error('Missing brand');
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Missing brand');
+        }
         return res.status(400).json({ error: 'brand is required' });
       }
       
       // Validate key_features
       if (!key_features) {
-        console.error('Missing key_features');
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Missing key_features');
+        }
         return res.status(400).json({ error: 'Key features are required' });
       }
       
       // Validate specification
       if (!specification) {
-        console.error('Missing specification');
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Missing specification');
+        }
         return res.status(400).json({ error: 'specification required' });
       }
 
@@ -157,14 +192,19 @@ class ProductController {
 
       // Create the product
       const product = await ProductModel.createProduct(productData, req.user.id);
+      // Only log in development mode
+    if (process.env.NODE_ENV !== 'production') {
       console.log('Product created successfully:', { productId: product.id, sellerId: req.user.id });
+    }
       
       res.status(201).json({
         message: 'Product successfully created',
         product
       });
     } catch (error) {
-      console.error('Error creating product:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error creating product:', error);
+      }
       res.status(error.status || 400).json({
         error: error.message || 'There was an error creating the product',
         details: process.env.NODE_ENV === 'development' ? error.stack : undefined
@@ -265,7 +305,9 @@ class ProductController {
       const product = await ProductModel.updateProduct(req.params.id, updateData, req.user.id);
       res.json(product);
     } catch (error) {
-      console.error('Error updating product:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error updating product:', error);
+      }
       res.status(400).json({ error: error.message });
     }
   }
@@ -336,7 +378,9 @@ class ProductController {
       
       res.json({ rejectedIds });
     } catch (error) {
-      console.error('Error checking product status:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error checking product status:', error);
+      }
       res.status(400).json({ error: error.message });
     }
   }
@@ -345,12 +389,16 @@ class ProductController {
   static async getSellerApprovedProducts(req, res) {
     try {
       if (!req.user) {
-        console.error('Unauthorized access attempt: No user found');
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Unauthorized access attempt: No user found');
+        }
         return res.status(401).json({ error: 'unauthorized access' });
       }
 
       if (req.user.role !== 'seller') {
-        console.error(`Access denied for role: ${req.user.role}`);
+        if (process.env.NODE_ENV !== 'production') {
+          console.error(`Access denied for role: ${req.user.role}`);
+        }
         return res.status(403).json({ error: 'Access denied. For seller only।' });
       }
 
@@ -359,18 +407,29 @@ class ProductController {
         seller_id: req.user.id 
       };
 
+      // Only log in development mode
+    if (process.env.NODE_ENV !== 'production') {
       console.log('Fetching seller\'s approved products with filters:', filters);
+    }
       const products = await ProductModel.findAll(filters);
       
       if (!products || products.length === 0) {
+        // Only log in development mode
+      if (process.env.NODE_ENV !== 'production') {
         console.log('No approved products found for this seller');
+      }
         return res.json([]);
       }
 
-      console.log(`Found ${products.length} approved products for seller ${req.user.id}`);
+      // Only log in development mode
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`Found ${products.length} approved products for seller ${req.user.id}`);
+      }
       res.json(products);
     } catch (error) {
-      console.error('Error in getSellerApprovedProducts:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error in getSellerApprovedProducts:', error);
+      }
       res.status(500).json({ error: 'Failure to receive vendors approved products' });
     }
   }
@@ -379,12 +438,16 @@ class ProductController {
   static async getIndustryApprovedProducts(req, res) {
     try {
       if (!req.user) {
-        console.error('Unauthorized access attempt: No user found');
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Unauthorized access attempt: No user found');
+        }
         return res.status(401).json({ error: 'Unauthorized access' });
       }
 
       if (req.user.role !== 'sub-admin') {
-        console.error(`Access denied for role: ${req.user.role}`);
+        if (process.env.NODE_ENV !== 'production') {
+          console.error(`Access denied for role: ${req.user.role}`);
+        }
         return res.status(403).json({ error: 'Access denied. Sub-admin only.' });
       }
 
@@ -400,10 +463,15 @@ class ProductController {
         status: 'approved' 
       });
 
+      // Only log in development mode
+    if (process.env.NODE_ENV !== 'production') {
       console.log(`Found ${products.length} approved products for industry ${industry}`);
+    }
       res.json(products);
     } catch (error) {
-      console.error('Error in getIndustryApprovedProducts:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error in getIndustryApprovedProducts:', error);
+      }
       res.status(500).json({ error: 'Failed to fetch industry approved products' });
     }
   }
@@ -412,12 +480,16 @@ class ProductController {
   static async getIndustryPendingProducts(req, res) {
     try {
       if (!req.user) {
-        console.error('Unauthorized access attempt: No user found');
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Unauthorized access attempt: No user found');
+        }
         return res.status(401).json({ error: 'Unauthorized access' });
       }
 
       if (req.user.role !== 'sub-admin') {
-        console.error(`Access denied for role: ${req.user.role}`);
+        if (process.env.NODE_ENV !== 'production') {
+          console.error(`Access denied for role: ${req.user.role}`);
+        }
         return res.status(403).json({ error: 'Access denied. Sub-admin only.' });
       }
 
@@ -433,10 +505,15 @@ class ProductController {
         status: 'pending' 
       });
 
+      // Only log in development mode
+    if (process.env.NODE_ENV !== 'production') {
       console.log(`Found ${products.length} pending products for industry ${industry}`);
+    }
       res.json(products);
     } catch (error) {
-      console.error('Error in getIndustryPendingProducts:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error in getIndustryPendingProducts:', error);
+      }
       res.status(500).json({ error: 'Failed to fetch industry pending products' });
     }
   }
@@ -445,12 +522,16 @@ class ProductController {
   static async getIndustryRejectedProducts(req, res) {
     try {
       if (!req.user) {
-        console.error('Unauthorized access attempt: No user found');
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Unauthorized access attempt: No user found');
+        }
         return res.status(401).json({ error: 'Unauthorized access' });
       }
 
       if (req.user.role !== 'sub-admin') {
-        console.error(`Access denied for role: ${req.user.role}`);
+        if (process.env.NODE_ENV !== 'production') {
+          console.error(`Access denied for role: ${req.user.role}`);
+        }
         return res.status(403).json({ error: 'Access denied. Sub-admin only.' });
       }
 
@@ -466,10 +547,15 @@ class ProductController {
         status: 'rejected' 
       });
 
+      // Only log in development mode
+    if (process.env.NODE_ENV !== 'production') {
       console.log(`Found ${products.length} rejected products for industry ${industry}`);
+    }
       res.json(products);
     } catch (error) {
-      console.error('Error in getIndustryRejectedProducts:', error);
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Error in getIndustryRejectedProducts:', error);
+      }
       res.status(500).json({ error: 'Failed to fetch industry rejected products' });
     }
   }
