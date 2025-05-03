@@ -128,12 +128,10 @@ class ProductModel {
       query = query.eq('seller_id', filters.seller_id);
     }
 
-    // Filter by industry (for industry-based filtering)
     if (filters.industry) {
-      query = query.eq('category', filters.industry);
+      query = query.eq('industry', filters.industry);
     }
     
-    // Filter by category (for category-based filtering)
     if (filters.category) {
       query = query.eq('category', filters.category);
     }
@@ -145,54 +143,6 @@ class ProductModel {
     }
 
     return products;
-  }
-  
-  // Get distinct categories from products table
-  static async getDistinctCategories() {
-    try {
-      // Get all categories from products table
-      const { data, error } = await supabase
-        .from('products')
-        .select('category')
-        .not('category', 'is', null)
-        .order('category');
-
-      if (error) throw new Error(error.message);
-      
-      // Extract unique categories
-      const categories = data
-        .map(item => item.category)
-        .filter((value, index, self) => self.indexOf(value) === index && value);
-      
-      return categories;
-    } catch (error) {
-      console.error('Error in ProductModel.getDistinctCategories:', error);
-      throw error;
-    }
-  }
-  
-  // Get distinct industries from products table
-  static async getDistinctIndustries() {
-    try {
-      // Get all industries from products table
-      const { data, error } = await supabase
-        .from('products')
-        .select('industry')
-        .not('industry', 'is', null)
-        .order('industry');
-
-      if (error) throw new Error(error.message);
-      
-      // Extract unique industries
-      const industries = data
-        .map(item => item.industry)
-        .filter((value, index, self) => self.indexOf(value) === index && value);
-      
-      return industries;
-    } catch (error) {
-      console.error('Error in ProductModel.getDistinctIndustries:', error);
-      throw error;
-    }
   }
 
   static async updateProduct(id, updateData, sellerId) {

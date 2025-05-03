@@ -10,6 +10,10 @@ class UserModel {
     if (role === 'sub-admin' && !industry) {
       throw new Error('Industry field is required for Sub-Admin accounts');
     }
+    
+    // IMPORTANT: Industry and category are separate fields
+    // Industry is used for sub-admin assignment (controls which products they can manage)
+    // Category is used for product classification (what type of product it is)
 
     // Hash password
     const salt = await bcrypt.genSalt(10);

@@ -32,16 +32,10 @@ router.get('/industry/approved', authenticateToken, authorizeRoles('sub-admin'),
 router.get('/industry/pending', authenticateToken, authorizeRoles('sub-admin'), ProductController.getIndustryPendingProducts);
 router.get('/industry/rejected', authenticateToken, authorizeRoles('sub-admin'), ProductController.getIndustryRejectedProducts);
 
-// Get all categories
-router.get('/categories', ProductController.getAllCategories);
-
-// Get all industries
-router.get('/industries', ProductController.getAllIndustries);
-
 // Get all products
 router.get('/', ProductController.getAllProducts);
 
-// Get product by ID - This should be after specific routes to avoid conflicts
+// Get product by ID
 router.get('/:id', ProductController.getProductById);
 
 // Update product (Seller/Admin)
