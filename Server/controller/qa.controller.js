@@ -47,17 +47,11 @@ class QAController {
       const userIndustry = req.headers['x-user-industry'] || req.user.industry;
       
       // Debug logging
-      // Only log in development mode
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('Headers received:', req.headers);
-        console.log('Getting pending questions for user - Role:', userRole, 'Industry:', userIndustry);
-      }
+      console.log('Headers received:', req.headers);
+      console.log('Getting pending questions for user - Role:', userRole, 'Industry:', userIndustry);
 
       const questions = await QAModel.getPendingQuestions(req.user.id, userRole, userIndustry);
-      // Only log in development mode
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(`Found ${questions.length} pending questions`);
-      }
+      console.log(`Found ${questions.length} pending questions`);
       res.json(questions);
     } catch (error) {
       console.error('Error getting pending questions:', error);
@@ -85,17 +79,11 @@ class QAController {
       const userIndustry = req.headers['x-user-industry'] || req.user.industry;
       
       // Debug logging
-      // Only log in development mode
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('Headers received:', req.headers);
-        console.log('Getting pending answers for user - Role:', userRole, 'Industry:', userIndustry);
-      }
+      console.log('Headers received:', req.headers);
+      console.log('Getting pending answers for user - Role:', userRole, 'Industry:', userIndustry);
 
       const answers = await QAModel.getPendingAnswers(req.user.id, userRole, userIndustry);
-      // Only log in development mode
-      if (process.env.NODE_ENV !== 'production') {
-        console.log(`Found ${answers.length} pending answers`);
-      }
+      console.log(`Found ${answers.length} pending answers`);
       res.json(answers);
     } catch (error) {
       console.error('Error getting pending answers:', error);
@@ -205,11 +193,8 @@ class QAController {
       const userIndustry = req.headers['x-user-industry'] || req.user.industry;
       
       // Debug logging
-      // Only log in development mode
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('Headers received:', req.headers);
-        console.log('Updating question status - Role:', userRole, 'Industry:', userIndustry);
-      }
+      console.log('Headers received:', req.headers);
+      console.log('Updating question status - Role:', userRole, 'Industry:', userIndustry);
 
       const updatedQuestion = await QAModel.updateQuestionStatus(
         req.params.id, 
@@ -258,11 +243,8 @@ class QAController {
       const userIndustry = req.headers['x-user-industry'] || req.user.industry;
       
       // Debug logging
-      // Only log in development mode
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('Headers received:', req.headers);
-        console.log('Updating answer status - Role:', userRole, 'Industry:', userIndustry);
-      }
+      console.log('Headers received:', req.headers);
+      console.log('Updating answer status - Role:', userRole, 'Industry:', userIndustry);
 
       const updatedAnswer = await QAModel.updateAnswerStatus(
         req.params.id, 

@@ -242,7 +242,7 @@ class QAModel {
 
     // If user is a sub-admin, only show questions for their industry/category
     if (role === 'sub-admin' && industry) {
-      query = query.eq('products.industry', industry);
+      query = query.eq('products.category', industry);
     }
 
     const { data: questions, error } = await query;
@@ -273,7 +273,7 @@ class QAModel {
 
     // If user is a sub-admin, only show answers for their industry/category
     if (role === 'sub-admin' && industry) {
-      query = query.eq('questions.products.industry', industry);
+      query = query.eq('questions.products.category', industry);
     }
 
     const { data: answers, error } = await query;
@@ -304,7 +304,7 @@ class QAModel {
 
     // For sub-admin, check if product belongs to their industry
     if (role === 'sub-admin') {
-      if (question.products.industry !== industry) {
+      if (question.products.category !== industry) {
         throw new Error('Unauthorized to update this question - not in your industry');
       }
     }
@@ -343,7 +343,7 @@ class QAModel {
 
     // For sub-admin, check if product belongs to their industry
     if (role === 'sub-admin') {
-      if (answer.questions.products.industry !== industry) {
+      if (answer.questions.products.category !== industry) {
         throw new Error('Unauthorized to update this answer - not in your industry');
       }
     }
@@ -393,7 +393,7 @@ class QAModel {
       }
 
       // Check if the question's product belongs to the sub-admin's industry
-      if (question.products.industry !== user.industry) {
+      if (question.products.category !== user.industry) {
         throw new Error('Unauthorized to delete this question - not in your industry');
       }
     } 

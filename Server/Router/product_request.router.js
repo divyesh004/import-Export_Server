@@ -29,6 +29,13 @@ router.get('/',
   ProductRequestController.getAllRequests
 );
 
+// Get approved product requests (Seller only)
+router.get('/approved',
+  authenticateToken,
+  authorizeRoles('seller'),
+  ProductRequestController.getApprovedRequests
+);
+
 // Get product request by ID (Admin only)
 router.get('/:id',
   authenticateToken,
@@ -43,13 +50,6 @@ router.patch('/:id/status',
   body('status').isIn(['pending', 'approved', 'rejected']).withMessage('Status must be pending, approved, or rejected'),
   validateRequest,
   ProductRequestController.updateStatus
-);
-
-// Get approved product requests (Seller only)
-router.get('/approved',
-  authenticateToken,
-  authorizeRoles('seller'),
-  ProductRequestController.getApprovedRequests
 );
 
 // Delete product request (Admin only)
