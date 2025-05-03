@@ -4,8 +4,6 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const authRouter = require('./Router/auth_router');
-
 
 const app = express();
 
@@ -15,7 +13,7 @@ app.use(cors());
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: process.env.RATE_LIMIT_WINDOW_MS || 40000000, // 15 minutes
+  windowMs: process.env.RATE_LIMIT_WINDOW_MS || 30000000, // 15 minutes
   max: process.env.RATE_LIMIT_MAX_REQUESTS || 1000
 });
 app.use(limiter);
@@ -54,10 +52,7 @@ app.use('/price', require('./Router/price.router'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  // Only log errors in development mode
-  if (process.env.NODE_ENV !== 'production') {
-    console.error(err.stack);
-  }
+  console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
@@ -68,9 +63,6 @@ app.use((req, res) => {
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  // Only log server startup information in development mode
-  if (process.env.NODE_ENV !== 'production') {
-    console.log(`Server is running on port ${PORT}`);
-    console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
-  }
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
 });

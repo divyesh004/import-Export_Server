@@ -68,16 +68,9 @@ class OrderModel {
           ORDER_STATUS.CANCELLED
         ]);
     } else if (role === 'seller') {
-      // Sellers can see approved orders and later status orders for their products
+      // Sellers can only see approved or later orders for their products
       query = query.eq('products.seller_id', userId)
-        .in('status', [
-          ORDER_STATUS.APPROVED,
-          ORDER_STATUS.CONFIRMED,
-          ORDER_STATUS.IN_PROGRESS,
-          ORDER_STATUS.DISPATCHED,
-          ORDER_STATUS.DELIVERED,
-          ORDER_STATUS.CANCELLED
-        ]);
+        .not('status', 'in', [ORDER_STATUS.PENDING_APPROVAL, ORDER_STATUS.REJECTED]);
     } else if (role === 'sub_admin') {
       // Sub-admins can see orders from their assigned industry
       // This requires a join with products and industries tables
@@ -111,16 +104,9 @@ class OrderModel {
           ORDER_STATUS.CANCELLED
         ]);
     } else if (filters.role === 'seller' && filters.userId) {
-      // Sellers can see approved orders and later status orders for their products
+      // Sellers can only see approved or later orders for their products
       query = query.eq('products.seller_id', filters.userId)
-        .in('status', [
-          ORDER_STATUS.APPROVED,
-          ORDER_STATUS.CONFIRMED,
-          ORDER_STATUS.IN_PROGRESS,
-          ORDER_STATUS.DISPATCHED,
-          ORDER_STATUS.DELIVERED,
-          ORDER_STATUS.CANCELLED
-        ]);
+        .not('status', 'in', [ORDER_STATUS.PENDING_APPROVAL, ORDER_STATUS.REJECTED]);
     } else if (filters.role === 'sub_admin' && filters.industry_id) {
       // Sub-admins can see orders from their assigned industry
       // This requires a join with products and industries tables
@@ -246,10 +232,9 @@ class OrderModel {
       },
       seller: {
         [ORDER_STATUS.APPROVED]: [ORDER_STATUS.CONFIRMED],
-        [ORDER_STATUS.CONFIRMED]: [ORDER_STATUS.IN_PROGRESS, ORDER_STATUS.CANCELLED],
-        [ORDER_STATUS.IN_PROGRESS]: [ORDER_STATUS.DISPATCHED, ORDER_STATUS.DELIVERED, ORDER_STATUS.CANCELLED],
-        [ORDER_STATUS.DISPATCHED]: [ORDER_STATUS.DELIVERED, ORDER_STATUS.CANCELLED],
-        // Seller can update status in this expanded flow
+        [ORDER_STATUS.CONFIRMED]: [ORDER_STATUS.IN_PROGRESS],
+        [ORDER_STATUS.IN_PROGRESS]: [ORDER_STATUS.DISPATCHED],
+        // Seller can only update status in this flow
       },
       buyer: {
         [ORDER_STATUS.DISPATCHED]: [ORDER_STATUS.DELIVERED],

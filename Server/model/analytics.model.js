@@ -2,7 +2,7 @@ const supabase = require('../config/supabase');
 
 class AnalyticsModel {
   static async getAnalytics(filters = {}) {
-    const { start_date, end_date, seller_id, industry } = filters;
+    const { start_date, end_date, seller_id } = filters;
     let query = supabase
       .from('orders')
       .select('*, products(*)')
@@ -10,10 +10,6 @@ class AnalyticsModel {
 
     if (seller_id) {
       query = query.eq('products.seller_id', seller_id);
-    }
-
-    if (industry) {
-      query = query.eq('products.industry', industry);
     }
 
     if (start_date) {
@@ -41,7 +37,7 @@ class AnalyticsModel {
   }
 
   static async getSellerAnalytics(filters = {}) {
-    const { start_date, end_date, seller_id, industry } = filters;
+    const { start_date, end_date, seller_id } = filters;
     
     let query = supabase
       .from('orders')
@@ -50,10 +46,6 @@ class AnalyticsModel {
 
     if (seller_id) {
       query = query.eq('products.seller_id', seller_id);
-    }
-    
-    if (industry) {
-      query = query.eq('products.industry', industry);
     }
 
     if (start_date) {
@@ -82,7 +74,7 @@ class AnalyticsModel {
   }
 
   static async getUserAnalytics(filters = {}) {
-    const { period = 'month', industry } = filters;
+    const { period = 'month' } = filters;
     
     // Get current date and date for comparison
     const now = new Date();
@@ -96,32 +88,20 @@ class AnalyticsModel {
     }
 
     // Get all users
-    let userQuery = supabase.from('users').select('*');
-    
-    // Filter users by industry if specified
-    if (industry) {
-      userQuery = userQuery.eq('industry', industry);
-    }
-    
-    const { data: users, error: userError } = await userQuery;
+    const { data: users, error: userError } = await supabase
+      .from('users')
+      .select('*');
 
     if (userError) {
       throw new Error(userError.message);
     }
 
     // Get active users (users who placed orders in the period)
-    let orderQuery = supabase
+    const { data: activeUsers, error: orderError } = await supabase
       .from('orders')
-      .select('buyer_id, products(*)')
+      .select('buyer_id')
       .gte('created_at', periodStart.toISOString())
       .lte('created_at', now.toISOString());
-      
-    // Filter by industry if specified
-    if (industry) {
-      orderQuery = orderQuery.eq('products.industry', industry);
-    }
-    
-    const { data: activeUsers, error: orderError } = await orderQuery;
 
     if (orderError) {
       throw new Error(orderError.message);
@@ -141,7 +121,7 @@ class AnalyticsModel {
   }
 
   static async getPlatformAnalytics(filters = {}) {
-    const { period = 'month', industry } = filters;
+    const { period = 'month' } = filters;
     
     // Get current date and date for comparison
     const now = new Date();
@@ -155,33 +135,21 @@ class AnalyticsModel {
     }
 
     // Get orders in the period
-    let orderQuery = supabase
+    const { data: orders, error: orderError } = await supabase
       .from('orders')
       .select('*, products(*)')
       .eq('status', 'completed')
       .gte('created_at', periodStart.toISOString())
       .lte('created_at', now.toISOString());
-      
-    // Filter by industry if specified
-    if (industry) {
-      orderQuery = orderQuery.eq('products.industry', industry);
-    }
-    
-    const { data: orders, error: orderError } = await orderQuery;
 
     if (orderError) {
       throw new Error(orderError.message);
     }
 
     // Get user statistics
-    let userQuery = supabase.from('users').select('*');
-    
-    // Filter users by industry if specified
-    if (industry) {
-      userQuery = userQuery.eq('industry', industry);
-    }
-    
-    const { data: users, error: userError } = await userQuery;
+    const { data: users, error: userError } = await supabase
+      .from('users')
+      .select('*');
 
     if (userError) {
       throw new Error(userError.message);
@@ -231,8 +199,8 @@ class AnalyticsModel {
       
       // For sub-admin, only get orders related to their industry
       if (industry) {
-        // Join with products and filter by industry (stored in industry column)
-        orderQuery = orderQuery.eq('products.industry', industry);
+        // Join with products and filter by industry (stored in category column)
+        orderQuery = orderQuery.eq('products.category', industry);
       }
       
       const { data: orders, error: orderError } = await orderQuery;
@@ -256,11 +224,11 @@ class AnalyticsModel {
       }, 0);
 
       // Get all questions
-      let questionQuery = supabase.from('questions').select('id, products(industry)');
+      let questionQuery = supabase.from('questions').select('id, products(category)');
       
       // Filter questions by industry if specified (for sub-admin)
       if (industry) {
-        questionQuery = questionQuery.eq('products.industry', industry);
+        questionQuery = questionQuery.eq('products.category', industry);
       }
       
       const { data: allQuestions, error: questionError } = await questionQuery;
@@ -288,9 +256,9 @@ class AnalyticsModel {
         .select('id')
         .eq('status', 'pending');
       
-      // Filter products by industry if specified (for sub-admin)
+      // Filter products by industry/category if specified (for sub-admin)
       if (industry) {
-        productQuery = productQuery.eq('industry', industry);
+        productQuery = productQuery.eq('category', industry);
       }
         
       const { data: pendingProductsData, error: productError } = await productQuery;
@@ -320,13 +288,13 @@ class AnalyticsModel {
       // Get recent orders
       let orderQuery = supabase
         .from('orders')
-        .select('*, users!orders_buyer_id_fkey(name), products(name, industry)')
+        .select('*, users!orders_buyer_id_fkey(name), products(name, category)')
         .order('created_at', { ascending: false })
         .limit(5);
       
       // Filter by industry if specified (for sub-admin)
       if (industry) {
-        orderQuery = orderQuery.eq('products.industry', industry);
+        orderQuery = orderQuery.eq('products.category', industry);
       }
       
       const { data: recentOrders, error: orderError } = await orderQuery;
@@ -338,13 +306,13 @@ class AnalyticsModel {
       // Get recent questions
       let questionQuery = supabase
         .from('questions')
-        .select('*, users(name), products(name, industry)')
+        .select('*, users(name), products(name, category)')
         .order('created_at', { ascending: false })
         .limit(5);
         
       // Filter by industry if specified (for sub-admin)
       if (industry) {
-        questionQuery = questionQuery.eq('products.industry', industry);
+        questionQuery = questionQuery.eq('products.category', industry);
       }
       
       const { data: recentQuestions, error: questionError } = await questionQuery;

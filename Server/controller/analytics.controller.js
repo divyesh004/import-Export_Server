@@ -7,8 +7,7 @@ class AnalyticsController {
       const filters = {
         start_date: req.query.start_date,
         end_date: req.query.end_date,
-        seller_id: req.query.seller_id,
-        industry: req.query.industry
+        seller_id: req.query.seller_id
       };
       const analytics = await AnalyticsModel.getAnalytics(filters);
       res.json(analytics);
@@ -24,8 +23,7 @@ class AnalyticsController {
         start_date: req.query.start_date,
         end_date: req.query.end_date,
         product_id: req.query.product_id,
-        seller_id: req.query.seller_id,
-        industry: req.query.industry
+        seller_id: req.query.seller_id
       };
       const analytics = await AnalyticsModel.getAnalytics(filters);
       res.json(analytics);
@@ -40,8 +38,7 @@ class AnalyticsController {
       const filters = {
         start_date: req.query.start_date,
         end_date: req.query.end_date,
-        seller_id: req.query.seller_id,
-        industry: req.query.industry
+        seller_id: req.query.seller_id
       };
       const analytics = await AnalyticsModel.getSellerAnalytics(filters);
       res.json(analytics);
@@ -54,8 +51,7 @@ class AnalyticsController {
   static async getUserAnalytics(req, res) {
     try {
       const filters = {
-        period: req.query.period || 'month',
-        industry: req.query.industry
+        period: req.query.period || 'month'
       };
       const analytics = await AnalyticsModel.getUserAnalytics(filters);
       res.json(analytics);
@@ -68,8 +64,7 @@ class AnalyticsController {
   static async getPlatformAnalytics(req, res) {
     try {
       const filters = {
-        period: req.query.period || 'month',
-        industry: req.query.industry
+        period: req.query.period || 'month'
       };
       
       const analytics = await AnalyticsModel.getPlatformAnalytics(filters);
