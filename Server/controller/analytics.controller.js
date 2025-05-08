@@ -113,6 +113,24 @@ class AnalyticsController {
       res.status(500).json({ error: error.message || 'Failed to fetch recent activities' });
     }
   }
+
+  // Get industry breakdown analytics
+  static async getIndustryBreakdown(req, res) {
+    try {
+      const filters = {
+        period: req.query.period || 'month',
+        start_date: req.query.start_date,
+        end_date: req.query.end_date,
+        industry: req.query.industry
+      };
+      
+      const industryData = await AnalyticsModel.getIndustryBreakdown(filters);
+      res.json(industryData);
+    } catch (error) {
+      console.error('Error fetching industry breakdown:', error);
+      res.status(400).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = AnalyticsController;

@@ -403,6 +403,65 @@ class AnalyticsModel {
       throw error;
     }
   }
+
+  static async getIndustryBreakdown(filters = {}) {
+    try {
+      const { period = 'month', start_date, end_date, industry } = filters;
+      
+      // Get current date and date for comparison
+      const now = new Date();
+      let periodStart = new Date();
+      
+      if (start_date) {
+        periodStart = new Date(start_date);
+      } else {
+        // Set period based on filter if start_date not provided
+        if (period === 'week') {
+          periodStart.setDate(now.getDate() - 7);
+        } else if (period === 'month') {
+          periodStart.setMonth(now.getMonth() - 1);
+        } else if (period === 'quarter') {
+          periodStart.setMonth(now.getMonth() - 3);
+        } else if (period === 'year') {
+          periodStart.setFullYear(now.getFullYear() - 1);
+        }
+      }
+      
+      // Set end date if provided, otherwise use current date
+      const periodEnd = end_date ? new Date(end_date) : now;
+      
+      // Get all products with their industries
+      let query = supabase
+        .from('products')
+        .select('id, industry, created_at')
+        .gte('created_at', periodStart.toISOString())
+        .lte('created_at', periodEnd.toISOString());
+      
+      // Filter by specific industry if provided (for sub-admin)
+      if (industry) {
+        query = query.eq('industry', industry);
+      }
+      
+      const { data: products, error } = await query;
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      // Group products by industry
+      const industryBreakdown = {};
+      
+      products.forEach(product => {
+        const productIndustry = product.industry || 'Uncategorized';
+        industryBreakdown[productIndustry] = (industryBreakdown[productIndustry] || 0) + 1;
+      });
+      
+      return industryBreakdown;
+    } catch (error) {
+      console.error('Error getting industry breakdown:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = AnalyticsModel;

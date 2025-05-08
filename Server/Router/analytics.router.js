@@ -45,6 +45,13 @@ router.get('/platform',
   AnalyticsController.getPlatformAnalytics
 );
 
+// Get industry breakdown analytics
+router.get('/industry-breakdown',
+  authenticateToken,
+  authorizeRoles('admin', 'sub-admin'),
+  AnalyticsController.getIndustryBreakdown
+);
+
 // Get revenue analytics (Admin only)
 router.get('/revenue',
   authenticateToken,
